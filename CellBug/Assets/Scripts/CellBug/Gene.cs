@@ -7,5 +7,5 @@ public class Gene
     public int GetGeneIndex(int GeneIndex) { return this.GeneIndex; }
 
     //需要时间来驱动的
-    public virtual void TimeDrive(float deltaTime) {};
+    public virtual void TimeDrive(float deltaTime) {}
 }

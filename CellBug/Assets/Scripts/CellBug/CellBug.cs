@@ -1,9 +1,26 @@
 //核心机制
+using UnityEngine;
+using System.Collections;
 
-public class CellBug
+public class CellBug:MonoBehaviour
 {
     private Dna dna;
     private Ability ability;
+
+    void Awake()
+    {
+
+    }
+
+    void Start()
+    {
+
+    }
+
+    void Update()
+    {
+
+    }
 
     public Dna GetDna()
     {
@@ -102,11 +119,11 @@ public class CellBug
     //出生的才会使用,系统产生的不使用
     public void SetDNA(int[] DNALineOne, int[] DNALineTwo)
     {
-        dna.SetDNA(DNALineOne, DNALineTwo);
+        dna.SetDna(DNALineOne, DNALineTwo);
     }
 
     //死亡
-    public void Dead(/*死亡方式*/)
+    public void Dead(Const.DeadEnum deadEnum)
     {
 
     }
