@@ -47,7 +47,7 @@ public class Dna
 	//产生后代时放出的DNA链
 	private int[] DnaVariation()
 	{
-		int seed = unchecked(int)DateTime.Now.Ticks;
+		int seed = DateTime.Now.Millisecond;
 		//那条链返回
 		Random ranWhatLine = new Random(seed);
 		int numWhatLine = ranWhatLine.Next(1,3);
