@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="12" height="8" tilewidth="80" tileheight="80">
+ <properties>
+  <property name="style" value="1"/>
+ </properties>
+ <tileset firstgid="1" name="tiled2" tilewidth="80" tileheight="80">
+  <image source="tiled2.png" width="240" height="240"/>
+ </tileset>
+ <layer name="path" width="12" height="8">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAdsFBBPSMQMwExM5Hq2dBobOphZoIwJwH1TDjk2IGYA4phgBUJUxsAAEQEAGk=
+  </data>
+ </layer>
+ <objectgroup name="path" width="12" height="8">
+  <object name="path" x="80" y="80"/>
+  <object name="path" x="80" y="400"/>
+  <object name="path" x="240" y="400"/>
+  <object name="path" x="240" y="320"/>
+  <object name="path" x="480" y="320"/>
+  <object name="path" x="480" y="160"/>
+  <object name="path" x="640" y="160"/>
+  <object name="path" x="640" y="400"/>
+  <object name="path" x="800" y="400"/>
+  <object name="Tower" x="0" y="80" width="80" height="400"/>
+  <object name="Tower" x="160" y="80" width="80" height="320"/>
+  <object name="Tower" x="240" y="80" width="240" height="240"/>
+  <object name="Tower" x="480" y="80" width="480" height="80"/>
+  <object name="Tower" x="720" y="160" width="240" height="240"/>
+  <object name="Tower" x="160" y="480" width="640" height="80"/>
+  <object name="Tower" x="320" y="400" width="320" height="80"/>
+  <object name="Tower" x="560" y="240" width="80" height="160"/>
+  <object name="Reward" type="3" x="0" y="160" width="80" height="80"/>
+  <object name="Reward" type="4" x="0" y="320" width="80" height="80"/>
+  <object name="Reward" type="5" x="160" y="160" width="80" height="80"/>
+  <object name="Reward" type="3" x="320" y="160" width="80" height="80"/>
+  <object name="Reward" type="4" x="480" y="480" width="80" height="80"/>
+  <object name="Reward" type="5" x="720" y="480" width="80" height="80">
+   <properties>
+    <property name="new" value="1"/>
+   </properties>
+  </object>
+  <object name="Reward" type="3" x="240" y="240" width="80" height="80"/>
+  <object name="Reward" type="3" x="800" y="240" width="80" height="80"/>
+  <object name="Reward" type="4" x="720" y="240" width="80" height="80"/>
+  <object name="Reward" type="5" x="560" y="320" width="80" height="80"/>
+  <object name="Reward" type="3" x="400" y="400" width="80" height="80"/>
+  <object name="Reward" type="4" x="560" y="480" width="80" height="80"/>
+  <object name="Reward" type="5" x="320" y="80" width="80" height="80"/>
+  <object name="Reward" type="3" x="400" y="160" width="80" height="80"/>
+  <object name="Reward" type="4" x="0" y="240" width="80" height="80"/>
+  <object name="Reward" type="5" x="0" y="400" width="80" height="80"/>
+  <object name="Reward" type="3" x="400" y="480" width="80" height="80"/>
+  <object name="Reward" type="4" x="640" y="480" width="80" height="80"/>
+  <object name="Reward" type="5" x="880" y="240" width="80" height="80"/>
+  <object name="Reward" type="3" x="800" y="320" width="80" height="80"/>
+  <object name="Reward" type="4" x="800" y="160" width="80" height="80"/>
+  <object name="Reward" type="5" x="560" y="80" width="80" height="80"/>
+  <object name="Reward" type="3" x="640" y="80" width="80" height="80"/>
+  <object name="Reward" type="3" x="240" y="80" width="80" height="80"/>
+ </objectgroup>
+</map>

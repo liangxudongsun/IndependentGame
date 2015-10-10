@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="12" height="8" tilewidth="80" tileheight="80">
+ <properties>
+  <property name="style" value="1"/>
+ </properties>
+ <tileset firstgid="1" name="tiled1" tilewidth="80" tileheight="80">
+  <image source="tiled1.png" width="240" height="240"/>
+ </tileset>
+ <layer name="path" width="12" height="8">
+  <data encoding="base64" compression="zlib">
+   eJxjYCANsAAxExQjAzaoGDsSzYYmj24OPoDNfHyAHPM5oPpg9EAAAFaYAGE=
+  </data>
+ </layer>
+ <objectgroup name="path" width="12" height="8">
+  <object name="path" x="0" y="80"/>
+  <object name="path" x="160" y="80"/>
+  <object name="path" x="160" y="400"/>
+  <object name="path" x="480" y="400"/>
+  <object name="path" x="480" y="80"/>
+  <object name="path" x="880" y="80"/>
+  <object name="Tower" x="0" y="160" width="160" height="320"/>
+  <object name="Tower" x="240" y="80" width="240" height="320"/>
+  <object name="Tower" x="160" y="480" width="640" height="80"/>
+  <object name="Tower" x="560" y="160" width="400" height="320"/>
+  <object name="Reward" type="1" x="0" y="240" width="80" height="80"/>
+  <object name="Reward" type="2" x="240" y="240" width="80" height="80"/>
+  <object name="Reward" type="0" x="400" y="80" width="80" height="80"/>
+  <object name="Reward" type="2" x="720" y="320" width="80" height="80"/>
+  <object name="Reward" type="1" x="560" y="240" width="80" height="80"/>
+  <object name="Reward" type="0" x="800" y="320" width="80" height="80">
+   <properties>
+    <property name="new" value="1"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>
