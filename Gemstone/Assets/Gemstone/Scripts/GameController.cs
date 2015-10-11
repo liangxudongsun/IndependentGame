@@ -54,27 +54,16 @@ public class GameController : MonoBehaviour
         return c;
     }
 
-    public void Select(Gemstone c)
+    public void Select(Gemstone c,int xAdd,int yAdd)
     {
-        if (currentGemstone == null)
-        {
-            currentGemstone = c;
-            currentGemstone.isSelected = true;
-            return;
-        }
-        else
-        {
-            if (Mathf.Abs(currentGemstone.rowIndex - c.rowIndex) + Mathf.Abs(currentGemstone.columnIndex - c.columnIndex) == 1)
-            {
-                StartCoroutine(ExangeAndMatches(currentGemstone, c));
-            }
-            else
-            {
-                audio.PlayOneShot(errorClip);
-            }
+        int xIndex = c.rowIndex + yAdd;
+        int yIndex = c.columnIndex + xAdd;
 
-            currentGemstone.isSelected = false;
-            currentGemstone = null;
+        if (xIndex >= 0 && xIndex < rowNum
+            && yIndex >= 0 && yIndex < columnNum)
+        {
+            Gemstone gem = GetGemstone(xIndex,yIndex);
+            StartCoroutine(ExangeAndMatches(c, gem));
         }
     }
 

@@ -14,6 +14,9 @@ public class Gemstone : MonoBehaviour {
 	public GameController gameController;
 	public SpriteRenderer spriteRenderer;
 
+    private Vector3 downPos = Vector3.zero;
+    private Vector3 upPos = Vector3.zero;
+
 	public bool isSelected{
 		set{
 			if(value){
@@ -55,8 +58,24 @@ public class Gemstone : MonoBehaviour {
 	}
 
 	public void OnMouseDown(){
-		gameController.Select (this);
-	}
+		//gameController.Select (this);
+        downPos = Input.mousePosition;
+    }
+
+    public void OnMouseUp()
+    {
+        upPos = Input.mousePosition;
+        
+        int xAdd = 0;
+        int yAdd = 0;
+
+        Vector3 dir = upPos - downPos;
+        
+        if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) { xAdd = dir.x > 0 ? 1 : -1; }
+        else { yAdd = dir.y > 0 ? 1 : -1; }
+
+        gameController.Select(this, xAdd, yAdd);
+    }
 
 	public void Dispose(){
 		Destroy (this.gameObject);
