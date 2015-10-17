@@ -45,11 +45,11 @@ public class Dna
 	}
 	
 	//产生后代时放出的DNA链
-	private int[] DnaVariation()
+	public int[] DnaVariation()
 	{
-		int seed = DateTime.Now.Millisecond;
+		int seed = (int)DateTime.Now.Ticks;
 		//那条链返回
-		Random ranWhatLine = new Random(seed);
+		Random ranWhatLine = new Random(seed + 500);
 		int numWhatLine = ranWhatLine.Next(1,3);
 		
 		if(numWhatLine == 1)
@@ -59,7 +59,7 @@ public class Dna
 				DnaLineChange[i] = DnaLineOne[i];
 			}
 		}
-		else if(numWhatLine == 1)
+		else if(numWhatLine == 2)
 		{
 			for(int i = 0; i < Const.DnaLineLength; i++)
 			{
@@ -69,14 +69,14 @@ public class Dna
 
 		//有没有发生突变
 		Random ranCanChange = new Random(seed + 1000);
-		int numCanChange = ranCanChange.Next(1,1000);
+		int numCanChange = ranCanChange.Next(1,20);
 		
 		if(numCanChange >= 1 && numCanChange <= 10)
 		{
 			//突变
 			Random ranWhatDNA = new Random(seed + 2000);
 			int numWhatDNA = ranWhatDNA.Next(1,Const.DnaLineLength + 1);
-			DnaLineChange[numWhatDNA] = Math.Abs(DnaLineChange[numWhatDNA] - 1);
+			DnaLineChange[numWhatDNA - 1] = Math.Abs(DnaLineChange[numWhatDNA - 1] - 1);
 		}
 		
 		return DnaLineChange;

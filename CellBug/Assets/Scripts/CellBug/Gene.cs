@@ -5,108 +5,40 @@ public class Gene
     private Const.GenesEnum GeneIndex;
     public void SetGeneIndex(Const.GenesEnum GeneIndex) { this.GeneIndex = GeneIndex; }
     public Const.GenesEnum GetGeneIndex() { return this.GeneIndex; }
-}
 
-public class Fluorescent : Gene
-{
-    private int lowLight, middleLight, highLight;
-    private int lowRadius, middleRadius, highRadius;
-
-    private int nowLight,nowRadius;
-
-    void Fluorescent()
-    {
-        SetGeneIndex(Const.GenesEnum.FluorescentEnum);
-        lowLight = Const.lowLightFlor;
-        middleLight = Const.middleLightFlor;
-        highLight = Const.highLightFlor;
-
-        lowRadius = Const.lowRadiusFlor;
-        middleRadius = Const.middleRadiusFlor;
-        highRadius = Const.highRadiusFlor;
-
-        nowLight = 0;
-        nowRadius = 0;
-    }
-
-    public int GetFlorescentLight()
-    {
-        if (nowLight <= 0)
-        {
-
-        }
-        return nowLight;
-    }
-
-    public int GetFlorescentRadius()
-    {
-        if (nowRadius <= 0)
-        {
-
-        }
-        return nowRadius;
-    }
-}
-
-public class SearchLight : Gene
-{
-    private int lowLight, middleLight, highLight;
-    private int lowRadius, middleRadius, highRadius;
-
-    private int nowLight,nowRadius;
-
-    void SearchLight()
-    {
-        SetGeneIndex(Const.GenesEnum.SearchLightEnum);
-        lowLight = Const.lowLightSearch;
-        middleLight = Const.middleLightSearch;
-        highLight = Const.highLightSearch;
-
-        lowRadius = Const.lowRadiusSearch;
-        middleRadius = Const.middleRadiusSearch;
-        highRadius = Const.highRadiusSearch;
-
-        nowLight = 0;
-        nowRadius = 0;
-    }
-
-    public int GetFlorescentLight()
-    {
-        if (nowLight <= 0)
-        {
-
-        }
-        return nowLight;
-    }
-
-    public int GetFlorescentRadius()
-    {
-        if (nowRadius <= 0)
-        {
-
-        }
-        return nowRadius;
-    }
+    public virtual int GetSpeed(CellBug cellbug) { return 0;}
+    public virtual string GetMusic(CellBug cellbug) { return ""; }
+    public virtual int GetBirthNum(CellBug cellbug) { return 0; }
+    public virtual int GetPowerGetFrom(CellBug cellbug) { return 0; }
+    public virtual int GetPoison(CellBug cellbug) { return 0; }
+    public virtual int GetAntibiotic(CellBug cellbug) { return 0; }
+    public virtual int GetPhotosynthesis(CellBug cellbug) { return 0; }
+    public virtual int GetAttackForce(CellBug cellbug) { return 0; }
 }
 
 public class Speed : Gene
 {
     private int lowSpeed, middleSpeed, highSpeed, nowSpeed;
-    void Speed()
+    public Speed()
     {
         SetGeneIndex(Const.GenesEnum.SpeedEnum);
-        lowSpeed = 5;
-        middleSpeed = 10;
-        highSpeed = 15;
+        lowSpeed = Const.lowSpeed;
+        middleSpeed = Const.middleSpeed;
+        highSpeed = Const.highSpeed;
         nowSpeed = -1;
     }
 
-    public int GetSpeed()
+    public override int GetSpeed(CellBug cellbug)
     {
         //需要访问dna
         if (nowSpeed <= 0)
         {
-
+            Dna dna = cellbug.GetAbility().GetDna();
+            int speedGeneTotal = dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.SpeedEnum) 
+                               + dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.SpeedEnum);
+            if (speedGeneTotal == 0) nowSpeed = lowSpeed;
+            else if (speedGeneTotal == 1) nowSpeed = middleSpeed;
+            else if (speedGeneTotal == 2) nowSpeed = highSpeed;
         }
         return nowSpeed;
     }
@@ -115,7 +47,7 @@ public class Speed : Gene
 public class Song : Gene
 {
     private string oneMusic, twoMusic, ThreeMusic, nowMusic;
-    void Song()
+    public Song()
     {
         SetGeneIndex(Const.GenesEnum.SongEnum);
         oneMusic = Const.oneMusic;
@@ -124,12 +56,17 @@ public class Song : Gene
         nowMusic = "";
     }
 
-    public string GetMusic()
+    public override string GetMusic(CellBug cellbug)
     {
         //需要访问dna
         if (nowMusic == "")
         {
-
+            Dna dna = cellbug.GetAbility().GetDna();
+            int songGeneTotal = dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.SongEnum)
+                               + dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.SongEnum);
+            if (songGeneTotal == 0) nowMusic = oneMusic;
+            else if (songGeneTotal == 1) nowMusic = twoMusic;
+            else if (songGeneTotal == 2) nowMusic = ThreeMusic;
         }
         return nowMusic;
     }
@@ -138,7 +75,7 @@ public class Song : Gene
 public class BrithNum : Gene
 {
     private int lowBirth, middleBirth, highBrith, nowBirthNum;
-    void BrithNum()
+    public BrithNum()
     {
         SetGeneIndex(Const.GenesEnum.BrithNumEnum);
         lowBirth = Const.lowBirth;
@@ -147,78 +84,40 @@ public class BrithNum : Gene
         nowBirthNum = -1;
     }
 
-    public int GetBirthNum()
+    public override int GetBirthNum(CellBug cellbug)
     {
         //需要访问dna
         if (nowBirthNum <= 0)
         {
-
+            Dna dna = cellbug.GetAbility().GetDna();
+            int birthNumGeneTotal = dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.BrithNumEnum)
+                               + dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.BrithNumEnum);
+            if (birthNumGeneTotal == 0) nowBirthNum = lowBirth;
+            else if (birthNumGeneTotal == 1) nowBirthNum = middleBirth;
+            else if (birthNumGeneTotal == 2) nowBirthNum = highBrith;
         }
         return nowBirthNum;
     }
 }
 
 
-public class PowerCup : Gene
-{
-    private int lowCup, middleCup, highCup, nowCup;
-    void PowerCup()
-    {
-        SetGeneIndex(Const.GenesEnum.PowerCupEnum);
-        lowCup = Const.lowCup;
-        middleCup = Const.middleCup;
-        highCup = Const.highCup;
-        nowCup = -1;
-    }
-
-    public int GetPowerCup()
-    {
-        //需要访问dna
-        if (nowCup <= 0)
-        {
-
-        }
-        return nowCup;
-    }
-}
-
-public class PowerGetPecent : Gene
-{
-    private float lowPecent, middlePecent, highPecent, nowPecent;
-    void PowerGetPecent()
-    {
-        SetGeneIndex(Const.GenesEnum.PowerGetPecentEnum);
-        lowPecent = Const.lowPecent;
-        middlePecent = Const.middlePecent;
-        highPecent = Const.highPecent;
-        nowPecent = -1.0f;
-    }
-
-    public float GetPowerGetPecent()
-    {
-        //需要访问dna
-        if (nowPecent <= 0)
-        {
-
-        }
-        return nowPecent;
-    }
-}
-
 public class PowerGetFrom : Gene
 {
     private int nowForm;
-    void PowerGetFrom()
+    public PowerGetFrom()
     {
         SetGeneIndex(Const.GenesEnum.PowerGetFromEnum);
         nowForm = -1;
     }
 
-    public int GetPowerGetFrom()
+    public override int GetPowerGetFrom(CellBug cellbug)
     {
         //需要访问dna
         if (nowForm < 0)
         {
+            Dna dna = cellbug.GetAbility().GetDna();
+            nowForm = dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.PowerGetFromEnum)
+                               + dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.PowerGetFromEnum);
         }
         return nowForm;
     }
@@ -228,18 +127,20 @@ public class PowerGetFrom : Gene
 public class Poison : Gene
 {
     private int nowPoison;
-    void Poison()
+    public Poison()
     {
         SetGeneIndex(Const.GenesEnum.PoisonEnum);
         nowPoison = -1;
     }
 
-    public int GetPoison()
+    public override int GetPoison(CellBug cellbug)
     {
         //需要访问dna
         if (nowPoison < 0)
         {
-
+            Dna dna = cellbug.GetAbility().GetDna();
+            nowPoison = dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.PoisonEnum)
+                               + dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.PoisonEnum);
         }
         return nowPoison;
     }
@@ -248,17 +149,20 @@ public class Poison : Gene
 public class Antibiotic : Gene
 {
     private int nowAntibiotic;
-    void Antibiotic()
+    public Antibiotic()
     {
         SetGeneIndex(Const.GenesEnum.AntibioticEnum);
         nowAntibiotic = -1;
     }
 
-    public int GetAntibiotic()
+    public override int GetAntibiotic(CellBug cellbug)
     {
         //需要访问dna
         if (nowAntibiotic < 0)
         {
+            Dna dna = cellbug.GetAbility().GetDna();
+            nowAntibiotic = dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.AntibioticEnum)
+                               + dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.AntibioticEnum);
 
         }
         return nowAntibiotic;
@@ -269,7 +173,7 @@ public class Antibiotic : Gene
 public class Photosynthesis : Gene
 {
     private int lowPhotosynthesis, middlePhotosynthesis, highPhotosynthesis, nowPhotosynthesis;
-    void Photosynthesis()
+    public Photosynthesis()
     {
         SetGeneIndex(Const.GenesEnum.PhotosynthesisEnum);
         lowPhotosynthesis = Const.lowPhotosynthesis;
@@ -278,12 +182,17 @@ public class Photosynthesis : Gene
         nowPhotosynthesis = -1;
     }
 
-    public int GetPhotosynthesis()
+    public override int GetPhotosynthesis(CellBug cellbug)
     {
         //需要访问dna
         if (nowPhotosynthesis < 0)
         {
-
+            Dna dna = cellbug.GetAbility().GetDna();
+            int photosynthesisGeneTotal = dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.PhotosynthesisEnum)
+                               + dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.PhotosynthesisEnum);
+            if (photosynthesisGeneTotal == 0) nowPhotosynthesis = lowPhotosynthesis;
+            else if (photosynthesisGeneTotal == 1) nowPhotosynthesis = middlePhotosynthesis;
+            else if (photosynthesisGeneTotal == 2) nowPhotosynthesis = highPhotosynthesis;
         }
         return nowPhotosynthesis;
     }
@@ -292,7 +201,7 @@ public class Photosynthesis : Gene
 public class AttackForce : Gene
 {
     private int lowAttackForce, middleAttackForce, highAttackForce, nowAttackForce;
-    void AttackForce()
+    public AttackForce()
     {
         SetGeneIndex(Const.GenesEnum.AttackForceEnum);
         lowAttackForce = Const.lowAttackForce;
@@ -301,12 +210,17 @@ public class AttackForce : Gene
         nowAttackForce = -1;
     }
 
-    public int GetAttackForce()
+    public override int GetAttackForce(CellBug cellbug)
     {
         //需要访问dna
         if (nowAttackForce < 0)
         {
-
+            Dna dna = cellbug.GetAbility().GetDna();
+            int attackGeneTotal = dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.AttackForceEnum)
+                               + dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.AttackForceEnum);
+            if (attackGeneTotal == 0) nowAttackForce = lowAttackForce;
+            else if (attackGeneTotal == 1) nowAttackForce = lowAttackForce;
+            else if (attackGeneTotal == 2) nowAttackForce = lowAttackForce;
         }
         return nowAttackForce;
     }
