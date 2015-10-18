@@ -25,18 +25,10 @@ public class Ability{
     public Vector3 targetPos = Vector3.zero;
     /// <¹ØÓÚÒÆ¶¯>
    
-    public Const.CellBugGroup cellBugGroup;
+    public Const.CellBugGroup cellBugGroup = Const.CellBugGroup.MineEnum;
     public Const.StutasEnum status = Const.StutasEnum.IdleEnum;
 
     private Dna dna = new Dna();
-
-    private Gene[] geneArray = new Gene[] {new Speed(),new Song(),new BrithNum(),new PowerGetFrom(),new Poison(),
-                                            new Antibiotic(),new Photosynthesis(),new AttackForce()};
-
-    public Gene[] GetGeneArray()
-    {
-        return geneArray;
-    }
 
     public void setMine(CellBug mine)
     {
@@ -118,10 +110,14 @@ public class Ability{
         if (power <= 0)
         {
             isLive = false;
-            mine.Dead(Const.DeadEnum.KilledEnum);
             return false;
         }
         return true;
+    }
+
+    public int GetPower()
+    {
+        return power;
     }
 
     public void liveTimeModify(float timePass)

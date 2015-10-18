@@ -6,21 +6,24 @@ public class CellBug:MonoBehaviour
 {
     private Ability ability = new Ability();
     private Camera camera;
-    private TapControl tapControl;
+    private GameControl gameControl;
     
     private CellBug targetEnemy = null;
-    private Meat targetMeat = null;
-    private Grass targetGrass = null;
+    private Food targetFood = null;
+    private float timeforpower = Const.timeForPowerDelete;
 
+    private bool isAI = true;
+    private AIControl aiControl = new AIControl();
     public GameObject cellBugProfabs;
 
     void Awake()
     {
-        tapControl = (GameObject.Find("tapControl") as GameObject).GetComponent<TapControl>();
-        tapControl.AddCellBugNative(this);
-        tapControl.AddCellBugAll(this);
-
+        gameControl = (GameObject.Find("gameControl") as GameObject).GetComponent<GameControl>();
+        gameControl.AddCellBugAll(this);
         ability.setMine(this);
+
+        if (ability.cellBugGroup == Const.CellBugGroup.MineEnum)
+            gameControl.AddCellBugNative(this);
     }
 
     void Start()
@@ -30,9 +33,28 @@ public class CellBug:MonoBehaviour
 
     void Update()
     {
-        if (!camera) return;
-        UpdateStatus();
-        UpdatePosition();
+        if (!isAI)
+        {
+            UpdateStatus();
+            UpdatePosition();
+        }
+        else
+        {
+            aiControl.UpdateStatus(this);
+            aiControl.UpdatePosition(this);
+        }
+
+        UpdatePowerForTime();
+    }
+
+    private void UpdatePowerForTime()
+    {
+        timeforpower -= Time.deltaTime;
+        if (timeforpower <= 0)
+        {
+            timeforpower = Const.timeForPowerDelete;
+            if (!ability.SetPower(-1)) this.Dead(Const.DeadEnum.StarveEnum);
+        }
     }
 
     //移动
@@ -52,6 +74,7 @@ public class CellBug:MonoBehaviour
     public void SetCamera(Camera camera)
     {
         this.camera = camera;
+        isAI = false;
     }
 
     //攻击
@@ -63,8 +86,7 @@ public class CellBug:MonoBehaviour
         if (dis <= 1) 
         {
             StopMove();
-            int attackForce = this.GetAbility().GetGeneArray()[(int)Const.GenesEnum.AttackForceEnum].GetAttackForce(this);
-            bool isLive = targetEnemy.GetAbility().SetPower(-attackForce);
+            bool isLive = targetEnemy.Attacked(this);
             if (!isLive)
             {
                 ability.status = Const.StutasEnum.IdleEnum;
@@ -74,46 +96,67 @@ public class CellBug:MonoBehaviour
         else { Move(targetEnemy.transform.position); } 
     }
 
+    //遭到攻击
+    public bool Attacked(CellBug cellBug)
+    {
+        int attackForce = Const.geneArray[(int)Const.GenesEnum.AttackForceEnum].GetAttackForce(cellBug);
+        bool isLive = ability.SetPower(-attackForce);
+        if (!isLive) this.Dead(Const.DeadEnum.KilledEnum);
+        return isLive;
+    }
+
     //吃草
     public void EatPlant()
     {
         //需要调用基因查看
-        if (!targetGrass) return;
-        int powerFrom = this.GetAbility().GetGeneArray()[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(this);
+        if (!targetFood) return;
+        int powerFrom = Const.geneArray[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(this);
         if (powerFrom == 2) return;
 
-        float dis = Vector3.Magnitude(targetGrass.transform.position - transform.position);
+        float dis = Vector3.Magnitude(targetFood.transform.position - transform.position);
         if (dis <= 1) 
         { 
-            StopMove(); 
-            this.GetAbility().SetPower(targetGrass.GetPower());
+            StopMove();
+            this.GetAbility().SetPower(targetFood.GetPower());
             ability.status = Const.StutasEnum.IdleEnum;
-            targetGrass = null;
-            Destroy(targetGrass); 
+            targetFood.Eated();
+            targetFood = null;
         }
-        else {Move(targetGrass.transform.position);} 
+        else { Move(targetFood.transform.position); } 
     }
 
     //吃肉
     public void EatMeat()
     {
         //需要调用基因查看,看能否吃肉,肉有没有毒,自己有没有抗毒性
-        if (!targetMeat) return;
-        int powerFrom = this.GetAbility().GetGeneArray()[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(this);
-        if (powerFrom == 0) return;
+        if (!targetFood) return;
+        int powerFrom = Const.geneArray[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(this);
+        if (powerFrom == 0)
+        {
+            Debug.Log("你还没有进化出食肉能力");
+            targetFood = null;
+            ability.status = Const.StutasEnum.IdleEnum;
+            return; 
+        }
 
-        float dis = Vector3.Magnitude(targetMeat.transform.position - transform.position);
+        float dis = Vector3.Magnitude(targetFood.transform.position - transform.position);
         if (dis <= 1) 
         {
             StopMove();
-            int antibiotic = this.GetAbility().GetGeneArray()[(int)Const.GenesEnum.AntibioticEnum].GetAntibiotic(this);
-            if (antibiotic >= targetMeat.GetPoison()){this.GetAbility().SetPower(targetMeat.GetPower());}
-            else{ this.Dead(Const.DeadEnum.PoisonEnum); }
+            int antibiotic = Const.geneArray[(int)Const.GenesEnum.AntibioticEnum].GetAntibiotic(this);
+            if (antibiotic >= targetFood.GetComponent<Meat>().GetPoison())
+            {
+                this.GetAbility().SetPower(targetFood.GetPower());
+            }
+            else
+            { 
+                this.Dead(Const.DeadEnum.PoisonEnum); 
+            }
             ability.status = Const.StutasEnum.IdleEnum;
-            targetMeat = null;
-            Destroy(targetMeat);
+            targetFood.Eated();
+            targetFood = null;
         }
-        else { Move(targetMeat.transform.position); }
+        else { Move(targetFood.transform.position); }
     }
 
     //召唤配偶
@@ -155,11 +198,16 @@ public class CellBug:MonoBehaviour
         return ability;
     }
 
+    public GameControl GetGameControl()
+    {
+        return gameControl;
+    }
+
     //死亡
     public void Dead(Const.DeadEnum deadEnum)
     {
-        tapControl.DeleteCellBugNative(this);
-        tapControl.DeleteCellBugAll(this);
+        gameControl.DeleteCellBugNative(this);
+        gameControl.DeleteCellBugAll(this);
         Destroy(this.gameObject,0.5f);
     }
 
@@ -174,27 +222,35 @@ public class CellBug:MonoBehaviour
         {
             tapedObject = hitInfo.collider.gameObject;
 
-            if (Const.CellBugTag == tapedObject.tag && tapedObject != this)
+            if (Const.CellBugTag == tapedObject.tag && tapedObject != this.gameObject)
             {
-                targetEnemy = tapedObject.GetComponent<CellBug>();
-                ability.status = Const.StutasEnum.AttackEnum;
+                ReadyAttack(tapedObject);
             }
             else if (Const.FloorTag == tapedObject.tag)
             {
                 ability.status = Const.StutasEnum.IdleEnum;
                 Move(tapPosition);
             }
-            else if (Const.GrassTag == tapedObject.tag)
+            else if (Const.FoodTag == tapedObject.tag)
             {
-                targetGrass = tapedObject.GetComponent<Grass>();
-                ability.status = Const.StutasEnum.EatPlantEnum;
-            }
-            else if (Const.MeatTag == tapedObject.tag)
-            {
-                targetMeat = tapedObject.GetComponent<Meat>();
-                ability.status = Const.StutasEnum.EatMeatEnum; 
+                ReadyEat(tapedObject);
             }
         }
+    }
+
+    public void ReadyAttack(GameObject tapedObject)
+    {
+        targetEnemy = tapedObject.GetComponent<CellBug>();
+        ability.status = Const.StutasEnum.AttackEnum;
+    }
+
+    public void ReadyEat(GameObject tapedObject)
+    {
+        targetFood = tapedObject.GetComponent<Food>();
+        if (targetFood.GetFoodType() == Const.FoodEnum.GrassEnum)
+            ability.status = Const.StutasEnum.EatPlantEnum;
+        if (targetFood.GetFoodType() == Const.FoodEnum.MeatEnum)
+            ability.status = Const.StutasEnum.EatMeatEnum;
     }
 
     private void UpdateStatus()
@@ -210,6 +266,8 @@ public class CellBug:MonoBehaviour
         case Const.StutasEnum.AttackEnum:
             Attack();
             break;
+        case Const.StutasEnum.AttackedEnum:
+            break;
         case Const.StutasEnum.EatMeatEnum:
             EatMeat();
             break;
@@ -221,6 +279,7 @@ public class CellBug:MonoBehaviour
 
     private void UpdatePosition()
     {
+        if (!camera) return;
         camera.transform.position = new Vector3(transform.position.x, transform.position.y, camera.transform.position.z);
         if (!ability.isArrive)
         {
@@ -242,7 +301,7 @@ public class CellBug:MonoBehaviour
     //产生后代
     private void RaiseUpSeed(CellBug cellBug)
     {
-        int birthNum = GetAbility().GetGeneArray()[(int)Const.GenesEnum.BrithNumEnum].GetBirthNum(this);
+        int birthNum = Const.geneArray[(int)Const.GenesEnum.BrithNumEnum].GetBirthNum(this);
         for (int i = 0; i < birthNum; i++)
         {
             GameObject bug = Instantiate(cellBugProfabs, this.transform.position, Quaternion.identity) as GameObject;
