@@ -1,6 +1,6 @@
 //核心机制
-
 using System;
+
 public class Dna
 {
 	//两条链

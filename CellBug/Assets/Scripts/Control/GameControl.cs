@@ -4,7 +4,6 @@ using System.Collections;
 public class GameControl : MonoBehaviour {
 
     private Camera camera;
-    private ArrayList cellBugNativeList = new ArrayList();//本族谱精灵集合
     private ArrayList cellBugAllList = new ArrayList();   //所有精灵集合
     private ArrayList foodArrayList = new ArrayList();     //食物集合
  
@@ -17,13 +16,16 @@ public class GameControl : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        SearchCellBug();
+        //SearchCellBug();
  	}
 	
 	// Update is called once per frame
 	void Update () {
-
-        if (!nowCellBug) return;
+        if (!nowCellBug)
+        {
+            SearchCellBug();
+            return;
+        }
         if (Input.GetMouseButtonDown(0))
         {
             nowCellBug.TapCheck(Camera.main.ScreenToWorldPoint(Input.mousePosition));
@@ -41,15 +43,16 @@ public class GameControl : MonoBehaviour {
 
     private void SearchCellBug()
     {
-        for (int i = 0; i < cellBugNativeList.Count;i++)
+        for (int i = 0; i < cellBugAllList.Count;i++)
         {
-            CellBug bug = cellBugNativeList[i] as CellBug;
-            if (bug)
+            CellBug bug = cellBugAllList[i] as CellBug;
+            if (bug && bug.GetAbility().cellBugGroup == Const.CellBugGroup.MineEnum)
             {
                 nowCellBug = bug; 
                 nowCellBug.SetCamera(camera);
                 return;
-            } 
+            }
+            continue;
         }
     }
 
@@ -74,14 +77,24 @@ public class GameControl : MonoBehaviour {
         return food;
     }
 
-    public void AddCellBugNative(CellBug cellBug)
+    //在一定距离上寻找敌人
+    public CellBug SearchEnemyWithDis(CellBug cellBug,float dis)
     {
-        cellBugNativeList.Add(cellBug);
-    }
+        CellBug enemy = null;
+        int powerFrom = Const.geneArray[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(cellBug);
+        if (powerFrom == 0) return null;
 
-    public void DeleteCellBugNative(CellBug cellBug)
-    {
-        cellBugNativeList.Remove(cellBug);
+        for (int i = 0; i < cellBugAllList.Count; i++)
+        {
+            CellBug tempEnemy = cellBugAllList[i] as CellBug;
+            if (cellBug.GetAbility().cellBugGroup == tempEnemy.GetAbility().cellBugGroup) continue;
+            if (Vector3.Magnitude(cellBug.transform.position - tempEnemy.transform.position) < dis)
+            {
+                enemy = tempEnemy;
+                break;
+            }
+        }
+        return enemy;
     }
 
     public void AddCellBugAll(CellBug cellBug)
@@ -91,6 +104,7 @@ public class GameControl : MonoBehaviour {
 
     public void DeleteCellBugAll(CellBug cellBug)
     {
+        if (cellBug == nowCellBug) nowCellBug = null;
         cellBugAllList.Remove(cellBug);
     }
 

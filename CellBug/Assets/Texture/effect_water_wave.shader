@@ -3,7 +3,7 @@ Properties {
 	_NoiseTex ("Noise Texture (RG)", 2D) = "white" {}
 	_MainTex ("Alpha (A)", 2D) = "white" {}
 	_HeatTime  ("Heat Time", range (0,1.5)) = 1
-	_HeatForce  ("Heat Force", range (0,0.1)) = 0.1
+	_HeatForce  ("Heat Force", range (0,10)) = 5
 }
 
 Category {
@@ -67,13 +67,11 @@ sampler2D _GrabTexture;
 
 half4 frag( v2f i ) : COLOR
 {
-
 	//noise effect
-	half4 offsetColor1 = tex2D(_NoiseTex, i.uvmain + _Time.xz*_HeatTime);
-    half4 offsetColor2 = tex2D(_NoiseTex, i.uvmain - _Time.yx*_HeatTime);
+	half4 offsetColor1 = tex2D(_NoiseTex, i.uvmain + /*_Time.xz**/_HeatTime);
+    half4 offsetColor2 = tex2D(_NoiseTex, i.uvmain - /*_Time.yx**/_HeatTime);
 	i.uvgrab.x += ((offsetColor1.r + offsetColor2.r) - 1) * _HeatForce;
 	i.uvgrab.y += ((offsetColor1.g + offsetColor2.g) - 1) * _HeatForce;
-	
 
 	half4 col = tex2Dproj( _GrabTexture, UNITY_PROJ_COORD(i.uvgrab));
 	//Skybox's alpha is zero, don't know why.

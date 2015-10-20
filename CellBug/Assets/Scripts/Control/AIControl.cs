@@ -12,13 +12,13 @@ public class AIControl{
                 CheckPower(cellBug);
                 break;
             case Const.StutasEnum.ReceviceMataEnum:
+                cellBug.RecieveCallMateStatus();
                 break;
             case Const.StutasEnum.SearchMateEnum:
+                cellBug.SearchMateStatus();
                 break;
             case Const.StutasEnum.AttackEnum:
                 cellBug.Attack();
-                break;
-            case Const.StutasEnum.AttackedEnum:
                 break;
             case Const.StutasEnum.EatMeatEnum:
                 cellBug.EatMeat();
@@ -31,11 +31,27 @@ public class AIControl{
 
     private void CheckPower(CellBug cellBug)
     {
-        if (cellBug.GetAbility().GetPower() >= Const.powerForStarve) return;
+        //寻找配偶
+        if (cellBug.GetAbility().GetPower() >= Const.powerForStarve)
+        {
+            cellBug.CallMate();
+            return;
+        }
+
+        //寻找食物
         Food food = cellBug.GetGameControl().SearchFoodWithDis(cellBug, Const.disForEatFood);
         if (food)
         {
             cellBug.ReadyEat(food.gameObject);
+            return;
+        }
+
+        //寻找敌人杀死来食用
+        CellBug cellBugEnemy = cellBug.GetGameControl().SearchEnemyWithDis(cellBug, Const.disForEatEnemy);
+        if (cellBugEnemy)
+        {
+            cellBug.ReadyAttack(cellBugEnemy.gameObject);
+            return;
         }
     }
 

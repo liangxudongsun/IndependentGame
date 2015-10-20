@@ -21,9 +21,6 @@ public class CellBug:MonoBehaviour
         gameControl = (GameObject.Find("gameControl") as GameObject).GetComponent<GameControl>();
         gameControl.AddCellBugAll(this);
         ability.setMine(this);
-
-        if (ability.cellBugGroup == Const.CellBugGroup.MineEnum)
-            gameControl.AddCellBugNative(this);
     }
 
     void Start()
@@ -44,7 +41,18 @@ public class CellBug:MonoBehaviour
             aiControl.UpdatePosition(this);
         }
 
+        ClearMateList();
         UpdatePowerForTime();
+    }
+
+    private void ClearMateList()
+    {
+        ability.timeForClearList-= Time.deltaTime;
+        if (ability.timeForClearList <= 0)
+        {
+            ability.timeForClearList = Const.timeForClearList;
+            ability.requestedList.Clear();
+        }
     }
 
     private void UpdatePowerForTime()
@@ -102,6 +110,7 @@ public class CellBug:MonoBehaviour
         int attackForce = Const.geneArray[(int)Const.GenesEnum.AttackForceEnum].GetAttackForce(cellBug);
         bool isLive = ability.SetPower(-attackForce);
         if (!isLive) this.Dead(Const.DeadEnum.KilledEnum);
+        if (isLive) this.ReadyAttack(cellBug.gameObject);
         return isLive;
     }
 
@@ -165,15 +174,40 @@ public class CellBug:MonoBehaviour
         //需要调用基因查看,播放相应声音
         ability.isResquest = true;
         ability.isMateSusess = false;
+        ability.status = Const.StutasEnum.SearchMateEnum;
     }
 
-    //配对成功,召唤者没有权利反对
+    //停止召唤(召唤有时间限制)
+    public void StopCallMate()
+    {
+        ability.isResquest = false;
+        ability.isMateSusess = true;
+        ability.status = Const.StutasEnum.IdleEnum;
+    }
+
+    //配对成功,反对就是放弃本次生育
     public void IWillYouMate(CellBug cellBug)
     {
+        ability.nowMateCellBug = cellBug;
+        ability.requestedList.Add(cellBug);
         //求偶成功,停止召唤
         ability.isResquest = false;
         ability.isMateSusess = true;
-        RaiseUpSeed(cellBug);
+    }
+
+    //同意配对
+    public void AcceptMate()
+    {
+        RaiseUpSeed(ability.nowMateCellBug);
+        ability.status = Const.StutasEnum.IdleEnum;
+        ability.nowMateCellBug = null;
+    }
+
+    //不同意配对
+    public void RefuseMate()
+    {
+        ability.status = Const.StutasEnum.IdleEnum;
+        ability.nowMateCellBug = null;
     }
 
     //接收到召唤
@@ -185,12 +219,34 @@ public class CellBug:MonoBehaviour
             ability.isRequested = true;
             ability.requestedList.Add(cellBug);
         }
+        ability.status = Const.StutasEnum.ReceviceMataEnum;
     }
 
     //拒绝被召唤
-    public void refuseedMate()
+    public void refuseCallMate(CellBug cellBug)
     {
         ability.isRequested = false;
+        ability.status = Const.StutasEnum.IdleEnum; 
+    }
+
+    //接受召唤
+    public void AcceptCallMate(CellBug cellBug)
+    {
+        cellBug.IWillYouMate(this);
+        ability.isRequested = false;
+        ability.status = Const.StutasEnum.IdleEnum;
+    }
+
+    //处于寻找配偶状态
+    public void SearchMateStatus()
+    {
+
+    }
+
+    //处于接收到召唤装态
+    public void RecieveCallMateStatus()
+    {
+
     }
 
     public Ability GetAbility()
@@ -206,7 +262,6 @@ public class CellBug:MonoBehaviour
     //死亡
     public void Dead(Const.DeadEnum deadEnum)
     {
-        gameControl.DeleteCellBugNative(this);
         gameControl.DeleteCellBugAll(this);
         Destroy(this.gameObject,0.5f);
     }
@@ -228,7 +283,9 @@ public class CellBug:MonoBehaviour
             }
             else if (Const.FloorTag == tapedObject.tag)
             {
-                ability.status = Const.StutasEnum.IdleEnum;
+                if (ability.status != Const.StutasEnum.SearchMateEnum 
+                    && ability.status != Const.StutasEnum.ReceviceMataEnum)
+                    ability.status = Const.StutasEnum.IdleEnum;
                 Move(tapPosition);
             }
             else if (Const.FoodTag == tapedObject.tag)
@@ -260,13 +317,13 @@ public class CellBug:MonoBehaviour
         case Const.StutasEnum.IdleEnum:
         	break;
         case Const.StutasEnum.ReceviceMataEnum:
+            RecieveCallMateStatus();
             break;
         case Const.StutasEnum.SearchMateEnum:
+            SearchMateStatus();
             break;
         case Const.StutasEnum.AttackEnum:
             Attack();
-            break;
-        case Const.StutasEnum.AttackedEnum:
             break;
         case Const.StutasEnum.EatMeatEnum:
             EatMeat();

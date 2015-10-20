@@ -11,12 +11,14 @@ public class Ability{
     private int power = Const.startPower;
     //当前剩余存活时间;
     private float remainLiveTime = 300.0f;
-
+ 
     /// <关于求偶>
     public bool isResquest = false;//是否求偶
     public bool isMateSusess = true;//是否求偶成功
-    public bool isRequested = false;
+    public bool isRequested = false;//是否被召唤
+    public CellBug nowMateCellBug = null;  //当前主动召唤的配偶
     public ArrayList requestedList = new ArrayList();
+    public float timeForClearList = Const.timeForClearList;//多久清理一次列表
     /// <关于求偶>
 
     /// <关于移动>
