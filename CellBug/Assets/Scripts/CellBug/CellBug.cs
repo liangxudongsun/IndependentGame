@@ -45,6 +45,11 @@ public class CellBug:MonoBehaviour
         UpdatePowerForTime();
     }
 
+    public void OnCollisionEnter2D(Collision2D coll)
+    {
+        Debug.Log("lxd");
+    }
+
     private void ClearMateList()
     {
         ability.timeForClearList-= Time.deltaTime;
@@ -276,10 +281,15 @@ public class CellBug:MonoBehaviour
         if (hitInfo.collider != null)
         {
             tapedObject = hitInfo.collider.gameObject;
-
-            if (Const.CellBugTag == tapedObject.tag && tapedObject != this.gameObject)
+            if (Const.CellBugTag == tapedObject.tag)
             {
-                ReadyAttack(tapedObject);
+                if (tapedObject.GetComponent<CellBug>().GetAbility().cellBugGroup != ability.cellBugGroup)
+                    ReadyAttack(tapedObject);
+                else
+                {
+                    ability.status = Const.StutasEnum.IdleEnum;
+                    Move(tapPosition);
+                }
             }
             else if (Const.FloorTag == tapedObject.tag)
             {
@@ -337,7 +347,12 @@ public class CellBug:MonoBehaviour
     private void UpdatePosition()
     {
         if (!camera) return;
-        camera.transform.position = new Vector3(transform.position.x, transform.position.y, camera.transform.position.z);
+        
+        float x = Mathf.Lerp(camera.transform.position.x, transform.position.x,Time.deltaTime * 5);
+        float y = Mathf.Lerp(camera.transform.position.y, transform.position.y, Time.deltaTime * 5);
+        float z = camera.transform.position.z;
+        camera.transform.position = new Vector3(x,y,z);
+
         if (!ability.isArrive)
         {
             Vector3 dir = ability.targetPos - transform.position;
