@@ -5,7 +5,7 @@ using System.Collections;
 public class CellBugCreater : MonoBehaviour {
 
     public CellBug cellBug;
-    public GameObject cellBugArray;
+    private GameObject cellBugLayer;
     public Const.CellBugGroup group = Const.CellBugGroup.MineEnum;
     public int cellBugNum = 0;
     public float createTimePur = 5.0f;
@@ -15,6 +15,7 @@ public class CellBugCreater : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         timeForCreate = createTimePur;
+        cellBugLayer = GameObject.Find("cellBugLayer") as GameObject;
     }
 	
 	// Update is called once per frame
@@ -35,9 +36,9 @@ public class CellBugCreater : MonoBehaviour {
         int seed = (int)DateTime.Now.Ticks;
         System.Random random = new System.Random(seed + 500 * cellBugNum);
         int dis = random.Next(1, 5);
-        Vector3 position = transform.position + new Vector3(dis,dis,-2);
+        Vector3 position = transform.position + new Vector3(dis,dis,cellBug.transform.position.z);
         CellBug bug = Instantiate(cellBug,position,Quaternion.identity) as CellBug;
         bug.GetAbility().cellBugGroup = group;
-        bug.transform.parent = cellBugArray.transform;
+        bug.transform.parent = cellBugLayer.transform;
     }
 }

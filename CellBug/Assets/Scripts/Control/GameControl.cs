@@ -3,7 +3,6 @@ using System.Collections;
 
 public class GameControl : MonoBehaviour {
 
-    private Camera camera;
     private ArrayList cellBugAllList = new ArrayList();   //所有精灵集合
     private ArrayList foodArrayList = new ArrayList();     //食物集合
  
@@ -11,13 +10,8 @@ public class GameControl : MonoBehaviour {
 
     void Awake()
     {
-        camera = Camera.main;
-    }
 
-	// Use this for initialization
-	void Start () {
-        //SearchCellBug();
- 	}
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -31,6 +25,11 @@ public class GameControl : MonoBehaviour {
             nowCellBug.TapCheck(Camera.main.ScreenToWorldPoint(Input.mousePosition));
         }
 	}
+
+    public CellBug GetNowCellBug()
+    {
+        return nowCellBug;
+    }
 
     public void ReSet()
     {
@@ -49,7 +48,7 @@ public class GameControl : MonoBehaviour {
             if (bug && bug.GetAbility().cellBugGroup == Const.CellBugGroup.MineEnum)
             {
                 nowCellBug = bug; 
-                nowCellBug.SetCamera(camera);
+                nowCellBug.SetCamera(Camera.main);
                 return;
             }
             continue;
@@ -65,9 +64,9 @@ public class GameControl : MonoBehaviour {
         for (int i = 0; i < foodArrayList.Count; i++)
         {
             Food tempFood = foodArrayList[i] as Food;
+            if (!tempFood.GetCanEat()) continue;
             if (powerFrom == 0 && tempFood.GetFoodType() == Const.FoodEnum.MeatEnum) continue;
             if (powerFrom == 2 && tempFood.GetFoodType() == Const.FoodEnum.GrassEnum) continue;
-
             if (Vector3.Magnitude(cellBug.transform.position - tempFood.transform.position) < dis)
             {
                 food = tempFood;
@@ -95,6 +94,27 @@ public class GameControl : MonoBehaviour {
             }
         }
         return enemy;
+    }
+
+    //寻找配偶
+    public CellBug SearchMate(CellBug cellBug)
+    {
+        CellBug bug = null;
+        Const.CellBugGroup group = cellBug.GetAbility().cellBugGroup;
+
+        for (int i = 0; i < cellBugAllList.Count;i++)
+        {
+            CellBug tempBug = cellBugAllList[i] as CellBug;
+            if (tempBug.GetAbility().status != Const.StutasEnum.ReceviceMataEnum 
+                && tempBug.GetAbility().status != Const.StutasEnum.SearchMateEnum
+                && tempBug.GetAbility().cellBugGroup == group)
+            {
+                bug = tempBug;
+                break;
+            }
+            continue;
+        }
+        return bug;
     }
 
     public void AddCellBugAll(CellBug cellBug)

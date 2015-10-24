@@ -14,10 +14,12 @@ public static class Const
     public static float powerForStarve = 30.0f;//处于饥饿状态,需要寻食
     public static float disForEatFood = 100.0f; //此距离上有食物则直接去吃
     public static float disForEatEnemy = 100.0f; //再次距离内寻找敌人
+    public static int powerForMate = 60;        //寻找配偶的条件
     //AI
 
+    public static float foodCreaterTime = 10.0f;//食物生成间隔
     public static float timeForClearList = 10.0f;//多久清理一次配偶列表
-    public static int startPower = 100;
+    public static int startPower = 20;
     public static int plantPower = 100;
     public static int meatPower = 200;
 

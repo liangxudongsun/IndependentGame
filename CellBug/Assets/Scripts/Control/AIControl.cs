@@ -12,7 +12,6 @@ public class AIControl{
                 CheckPower(cellBug);
                 break;
             case Const.StutasEnum.ReceviceMataEnum:
-                cellBug.RecieveCallMateStatus();
                 break;
             case Const.StutasEnum.SearchMateEnum:
                 cellBug.SearchMateStatus();
@@ -32,15 +31,16 @@ public class AIControl{
     private void CheckPower(CellBug cellBug)
     {
         //寻找配偶
-        if (cellBug.GetAbility().GetPower() >= Const.powerForStarve)
+        CellBug mate = cellBug.GetGameControl().SearchMate(cellBug);
+        if (cellBug.GetAbility().GetPower() >= Const.powerForMate && cellBug.GetAbility().GetCanMate())
         {
-            cellBug.CallMate();
+            cellBug.ReadyMate(mate.gameObject);
             return;
         }
 
         //寻找食物
         Food food = cellBug.GetGameControl().SearchFoodWithDis(cellBug, Const.disForEatFood);
-        if (food)
+        if (food && cellBug.GetAbility().GetPower() < Const.powerForStarve)
         {
             cellBug.ReadyEat(food.gameObject);
             return;
@@ -48,7 +48,7 @@ public class AIControl{
 
         //寻找敌人杀死来食用
         CellBug cellBugEnemy = cellBug.GetGameControl().SearchEnemyWithDis(cellBug, Const.disForEatEnemy);
-        if (cellBugEnemy)
+        if (cellBugEnemy && cellBug.GetAbility().GetPower() < Const.powerForStarve)
         {
             cellBug.ReadyAttack(cellBugEnemy.gameObject);
             return;

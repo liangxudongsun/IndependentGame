@@ -10,16 +10,23 @@ public class CellBug:MonoBehaviour
     
     private CellBug targetEnemy = null;
     private Food targetFood = null;
+    private CellBug targetMateCellBug = null;  //当前主动召唤的配偶
     private float timeforpower = Const.timeForPowerDelete;
 
     private bool isAI = true;
     private AIControl aiControl = new AIControl();
+    private GameObject cellLayer;
+    private GameObject foodLayer;
+
     public GameObject cellBugProfabs;
+    public GameObject meatProfabs;
 
     void Awake()
     {
         gameControl = (GameObject.Find("gameControl") as GameObject).GetComponent<GameControl>();
         gameControl.AddCellBugAll(this);
+        cellLayer = GameObject.Find("cellBugLayer") as GameObject;
+        foodLayer = GameObject.Find("foodLayer");
         ability.setMine(this);
     }
 
@@ -41,13 +48,9 @@ public class CellBug:MonoBehaviour
             aiControl.UpdatePosition(this);
         }
 
+        ability.UpdateMateTime(Time.deltaTime);
         ClearMateList();
         UpdatePowerForTime();
-    }
-
-    public void OnCollisionEnter2D(Collision2D coll)
-    {
-        Debug.Log("lxd");
     }
 
     private void ClearMateList()
@@ -95,7 +98,8 @@ public class CellBug:MonoBehaviour
     {
         //如果死亡则停止攻击
         if (!targetEnemy) return;
-        float dis = Vector3.Magnitude(targetEnemy.transform.position - transform.position);
+        float dis = Vector3.Magnitude(new Vector3(targetEnemy.transform.position.x, targetEnemy.transform.position.y, transform.position.z)
+                    - transform.position);
         if (dis <= 1) 
         {
             StopMove();
@@ -127,8 +131,9 @@ public class CellBug:MonoBehaviour
         int powerFrom = Const.geneArray[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(this);
         if (powerFrom == 2) return;
 
-        float dis = Vector3.Magnitude(targetFood.transform.position - transform.position);
-        if (dis <= 1) 
+        float dis = Vector3.Magnitude(new Vector3(targetFood.transform.position.x, targetFood.transform.position.y, transform.position.z) 
+            - transform.position);
+        if (dis <= 2) 
         { 
             StopMove();
             this.GetAbility().SetPower(targetFood.GetPower());
@@ -153,7 +158,8 @@ public class CellBug:MonoBehaviour
             return; 
         }
 
-        float dis = Vector3.Magnitude(targetFood.transform.position - transform.position);
+        float dis = Vector3.Magnitude(new Vector3(targetFood.transform.position.x, targetFood.transform.position.y, transform.position.z)
+            - transform.position);
         if (dis <= 1) 
         {
             StopMove();
@@ -173,85 +179,67 @@ public class CellBug:MonoBehaviour
         else { Move(targetFood.transform.position); }
     }
 
-    //召唤配偶
-    public void CallMate()
+    //进入发情期
+    public void StartCallMate()
     {
-        //需要调用基因查看,播放相应声音
-        ability.isResquest = true;
-        ability.isMateSusess = false;
-        ability.status = Const.StutasEnum.SearchMateEnum;
+
     }
 
-    //停止召唤(召唤有时间限制)
+    //发情结束
     public void StopCallMate()
     {
-        ability.isResquest = false;
-        ability.isMateSusess = true;
-        ability.status = Const.StutasEnum.IdleEnum;
-    }
 
-    //配对成功,反对就是放弃本次生育
-    public void IWillYouMate(CellBug cellBug)
-    {
-        ability.nowMateCellBug = cellBug;
-        ability.requestedList.Add(cellBug);
-        //求偶成功,停止召唤
-        ability.isResquest = false;
-        ability.isMateSusess = true;
     }
-
-    //同意配对
-    public void AcceptMate()
-    {
-        RaiseUpSeed(ability.nowMateCellBug);
-        ability.status = Const.StutasEnum.IdleEnum;
-        ability.nowMateCellBug = null;
-    }
-
-    //不同意配对
-    public void RefuseMate()
-    {
-        ability.status = Const.StutasEnum.IdleEnum;
-        ability.nowMateCellBug = null;
-    }
-
+    
     //接收到召唤
     public void CallProCast(CellBug cellBug)
     {
-        //禁止接受其他召唤
         if (!ability.requestedList.Contains(cellBug))
         {
-            ability.isRequested = true;
             ability.requestedList.Add(cellBug);
         }
         ability.status = Const.StutasEnum.ReceviceMataEnum;
     }
 
     //拒绝被召唤
-    public void refuseCallMate(CellBug cellBug)
+    public void refuseCallMate()
     {
-        ability.isRequested = false;
         ability.status = Const.StutasEnum.IdleEnum; 
     }
 
     //接受召唤
-    public void AcceptCallMate(CellBug cellBug)
+    public void AcceptCallMate()
     {
-        cellBug.IWillYouMate(this);
-        ability.isRequested = false;
         ability.status = Const.StutasEnum.IdleEnum;
     }
 
     //处于寻找配偶状态
     public void SearchMateStatus()
     {
+        //如果死亡则停止寻找
+        if (!targetMateCellBug) return;
 
+        float dis = Vector3.Magnitude(new Vector3(targetMateCellBug.transform.position.x, targetMateCellBug.transform.position.y, transform.position.z)
+            - transform.position);
+        if (dis <= 1)
+        {
+            StopMove();
+            targetMateCellBug.CallProCast(this);
+            RaiseUpSeed(targetMateCellBug);
+            stopMate();
+        }
+        else 
+        {
+            Move(targetMateCellBug.transform.position); 
+        } 
     }
 
-    //处于接收到召唤装态
-    public void RecieveCallMateStatus()
+    //停止寻找配偶
+    private void stopMate()
     {
-
+        targetMateCellBug = null;
+        ability.status = Const.StutasEnum.IdleEnum;
+        ability.SetCanMate(false);
     }
 
     public Ability GetAbility()
@@ -267,6 +255,10 @@ public class CellBug:MonoBehaviour
     //死亡
     public void Dead(Const.DeadEnum deadEnum)
     {
+        GameObject obj = Instantiate(meatProfabs, new Vector3(transform.position.x, transform.position.y, meatProfabs.transform.position.z), Quaternion.identity) as GameObject;
+        obj.transform.parent = foodLayer.transform;
+        Destroy(obj, 5.0f);
+
         gameControl.DeleteCellBugAll(this);
         Destroy(this.gameObject,0.5f);
     }
@@ -281,28 +273,40 @@ public class CellBug:MonoBehaviour
         if (hitInfo.collider != null)
         {
             tapedObject = hitInfo.collider.gameObject;
-            if (Const.CellBugTag == tapedObject.tag)
+            if (Const.CellBugTag == tapedObject.tag && tapedObject != this.gameObject)
             {
-                if (tapedObject.GetComponent<CellBug>().GetAbility().cellBugGroup != ability.cellBugGroup)
-                    ReadyAttack(tapedObject);
-                else
+                if (tapedObject.GetComponent<CellBug>().GetAbility().cellBugGroup != ability.cellBugGroup)   
                 {
-                    ability.status = Const.StutasEnum.IdleEnum;
-                    Move(tapPosition);
+                    ReadyAttack(tapedObject);
+                }
+
+                if (tapedObject.GetComponent<CellBug>().GetAbility().cellBugGroup == ability.cellBugGroup 
+                    && ability.GetCanMate())
+                {
+                    ReadyMate(tapedObject);
                 }
             }
-            else if (Const.FloorTag == tapedObject.tag)
+            
+            if (Const.FloorTag == tapedObject.tag)
             {
                 if (ability.status != Const.StutasEnum.SearchMateEnum 
                     && ability.status != Const.StutasEnum.ReceviceMataEnum)
                     ability.status = Const.StutasEnum.IdleEnum;
                 Move(tapPosition);
             }
-            else if (Const.FoodTag == tapedObject.tag)
+            
+            if (Const.FoodTag == tapedObject.tag)
             {
                 ReadyEat(tapedObject);
             }
         }
+    }
+
+    public void ReadyMate(GameObject tapedObject)
+    {
+        targetMateCellBug = tapedObject.GetComponent<CellBug>() as CellBug;
+        ability.status = Const.StutasEnum.SearchMateEnum;
+        ability.SetCanMate(false);
     }
 
     public void ReadyAttack(GameObject tapedObject)
@@ -327,7 +331,6 @@ public class CellBug:MonoBehaviour
         case Const.StutasEnum.IdleEnum:
         	break;
         case Const.StutasEnum.ReceviceMataEnum:
-            RecieveCallMateStatus();
             break;
         case Const.StutasEnum.SearchMateEnum:
             SearchMateStatus();
@@ -378,6 +381,8 @@ public class CellBug:MonoBehaviour
         {
             GameObject bug = Instantiate(cellBugProfabs, this.transform.position, Quaternion.identity) as GameObject;
             CellBug temCellBug = bug.GetComponent<CellBug>();
+
+            temCellBug.transform.parent = cellLayer.transform;
 
             int[] lineOne = this.GetAbility().GetDna().DnaVariation();
             int[] lineTwo = cellBug.GetAbility().GetDna().DnaVariation();
