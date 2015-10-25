@@ -32,7 +32,7 @@ public class CellBug:MonoBehaviour
 
     void Start()
     {
-
+        
     }
 
     void Update()

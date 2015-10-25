@@ -53,6 +53,9 @@ public class AIControl{
             cellBug.ReadyAttack(cellBugEnemy.gameObject);
             return;
         }
+
+        //无所事事时
+
     }
 
     public void UpdatePosition(CellBug cellBug)

@@ -1,11 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 
 public class GameControl : MonoBehaviour {
 
     private ArrayList cellBugAllList = new ArrayList();   //所有精灵集合
     private ArrayList foodArrayList = new ArrayList();     //食物集合
- 
+
     private CellBug nowCellBug = null;
 
     void Awake()
@@ -58,9 +59,9 @@ public class GameControl : MonoBehaviour {
     //在一定距离上寻找食物
     public Food SearchFoodWithDis(CellBug cellBug,float dis)
     {
-        Food food = null;
-        int powerFrom = Const.geneArray[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(cellBug);
+        ArrayList foodList = new ArrayList();
 
+        int powerFrom = Const.geneArray[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(cellBug);
         for (int i = 0; i < foodArrayList.Count; i++)
         {
             Food tempFood = foodArrayList[i] as Food;
@@ -69,17 +70,27 @@ public class GameControl : MonoBehaviour {
             if (powerFrom == 2 && tempFood.GetFoodType() == Const.FoodEnum.GrassEnum) continue;
             if (Vector3.Magnitude(cellBug.transform.position - tempFood.transform.position) < dis)
             {
-                food = tempFood;
-                break;
+                foodList.Add(tempFood);
             }
         }
-        return food;
+
+        if (foodList.Count != 0)
+        {
+            int seed = (int)DateTime.Now.Ticks;
+            //那条链返回
+            System.Random ranWhatIndex = new System.Random(seed);
+            int num = ranWhatIndex.Next(1,foodList.Count + 1);
+            Food food = foodList[num - 1] as Food;
+            return food;
+        }
+        return null;
     }
 
     //在一定距离上寻找敌人
     public CellBug SearchEnemyWithDis(CellBug cellBug,float dis)
     {
-        CellBug enemy = null;
+        ArrayList enemyBugList = new ArrayList();
+
         int powerFrom = Const.geneArray[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(cellBug);
         if (powerFrom == 0) return null;
 
@@ -89,19 +100,28 @@ public class GameControl : MonoBehaviour {
             if (cellBug.GetAbility().cellBugGroup == tempEnemy.GetAbility().cellBugGroup) continue;
             if (Vector3.Magnitude(cellBug.transform.position - tempEnemy.transform.position) < dis)
             {
-                enemy = tempEnemy;
-                break;
+                enemyBugList.Add(tempEnemy);
             }
         }
-        return enemy;
+
+        if (enemyBugList.Count != 0)
+        {
+            int seed = (int)DateTime.Now.Ticks;
+            //那条链返回
+            System.Random ranWhatIndex = new System.Random(seed);
+            int num = ranWhatIndex.Next(1, enemyBugList.Count + 1);
+            CellBug bug = enemyBugList[num - 1] as CellBug;
+            return bug;
+        }
+        return null;
     }
 
     //寻找配偶
     public CellBug SearchMate(CellBug cellBug)
     {
-        CellBug bug = null;
         Const.CellBugGroup group = cellBug.GetAbility().cellBugGroup;
-
+        
+        ArrayList mateBugList = new ArrayList();
         for (int i = 0; i < cellBugAllList.Count;i++)
         {
             CellBug tempBug = cellBugAllList[i] as CellBug;
@@ -109,12 +129,21 @@ public class GameControl : MonoBehaviour {
                 && tempBug.GetAbility().status != Const.StutasEnum.SearchMateEnum
                 && tempBug.GetAbility().cellBugGroup == group)
             {
-                bug = tempBug;
-                break;
+                mateBugList.Add(tempBug);
             }
-            continue;
         }
-        return bug;
+
+        if (mateBugList.Count != 0)
+        {
+            int seed = (int)DateTime.Now.Ticks;
+            //那条链返回
+            System.Random ranWhatIndex = new System.Random(seed);
+            int num = ranWhatIndex.Next(1, mateBugList.Count + 1);
+            CellBug bug = mateBugList[num - 1] as CellBug;
+            return bug;
+        }
+
+        return null;
     }
 
     public void AddCellBugAll(CellBug cellBug)
