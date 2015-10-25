@@ -2,7 +2,11 @@
 using System.Collections;
 
 public class AIControl{
-    
+
+    private CellBug mate = null;
+    private Food food = null;
+    private CellBug cellBugEnemy = null;
+
     public void UpdateStatus(CellBug cellBug)
     {
         Const.StutasEnum status = cellBug.GetAbility().status;
@@ -14,16 +18,20 @@ public class AIControl{
             case Const.StutasEnum.ReceviceMataEnum:
                 break;
             case Const.StutasEnum.SearchMateEnum:
-                cellBug.SearchMateStatus();
+                if (mate){cellBug.SearchMateStatus();}
+                else { cellBug.GetAbility().status = Const.StutasEnum.IdleEnum;}
                 break;
             case Const.StutasEnum.AttackEnum:
-                cellBug.Attack();
+                if (cellBugEnemy){cellBug.Attack();}
+                else { cellBug.GetAbility().status = Const.StutasEnum.IdleEnum;}
                 break;
             case Const.StutasEnum.EatMeatEnum:
-                cellBug.EatMeat();
+                if (food){cellBug.EatMeat();}
+                else { cellBug.GetAbility().status = Const.StutasEnum.IdleEnum;}
                 break;
             case Const.StutasEnum.EatPlantEnum:
-                cellBug.EatPlant();
+                if (food) { cellBug.EatPlant(); }
+                else { cellBug.GetAbility().status = Const.StutasEnum.IdleEnum; }
                 break;
         }
     }
@@ -31,7 +39,7 @@ public class AIControl{
     private void CheckPower(CellBug cellBug)
     {
         //寻找配偶
-        CellBug mate = cellBug.GetGameControl().SearchMate(cellBug);
+        mate = cellBug.GetGameControl().SearchMate(cellBug);
         if (cellBug.GetAbility().GetPower() >= Const.powerForMate && cellBug.GetAbility().GetCanMate())
         {
             cellBug.ReadyMate(mate.gameObject);
@@ -39,7 +47,7 @@ public class AIControl{
         }
 
         //寻找食物
-        Food food = cellBug.GetGameControl().SearchFoodWithDis(cellBug, Const.disForEatFood);
+        food = cellBug.GetGameControl().SearchFoodWithDis(cellBug, Const.disForEatFood);
         if (food && cellBug.GetAbility().GetPower() < Const.powerForStarve)
         {
             cellBug.ReadyEat(food.gameObject);
@@ -47,7 +55,7 @@ public class AIControl{
         }
 
         //寻找敌人杀死来食用
-        CellBug cellBugEnemy = cellBug.GetGameControl().SearchEnemyWithDis(cellBug, Const.disForEatEnemy);
+        cellBugEnemy = cellBug.GetGameControl().SearchEnemyWithDis(cellBug, Const.disForEatEnemy);
         if (cellBugEnemy && cellBug.GetAbility().GetPower() < Const.powerForStarve)
         {
             cellBug.ReadyAttack(cellBugEnemy.gameObject);
