@@ -8,6 +8,7 @@ public static class Const
 
     public static int DnaLineLength = 8;
 	public static float MaleTime = 30.0f;
+    public static float maxPower = 200.0f;
 
     //AI
     public static float powerForStarve = 30.0f;//处于饥饿状态,需要寻食

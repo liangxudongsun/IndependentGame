@@ -20,9 +20,13 @@ public class CellBug:MonoBehaviour
     public GameObject cellBugProfabs;
     public GameObject meatProfabs;
     public GameObject titleProfabs;
+    public GameObject bloodProfabs;
 
     private UILabel titleLabel = null;
+    public UISlider bloodSlider = null;
+
     private static int ID = 0;
+
     void Awake()
     {
         gameControl = (GameObject.Find("gameControl") as GameObject).GetComponent<GameControl>();
@@ -35,9 +39,13 @@ public class CellBug:MonoBehaviour
 
     void Start()
     {
-        GameObject gameObject = Instantiate(titleProfabs, transform.position + new Vector3(0,1,-1), Quaternion.identity) as GameObject;
-        titleLabel = gameObject.GetComponent<UILabel>();
+        GameObject gameObjectTitle = Instantiate(titleProfabs, transform.position + new Vector3(0,1,-1), Quaternion.identity) as GameObject;
+        titleLabel = gameObjectTitle.GetComponent<UILabel>();
         titleLabel.text = Const.GroupName[(int)ability.cellBugGroup] + ability.id;
+
+        GameObject gameObjectBlood = Instantiate(bloodProfabs,transform.position + new Vector3(0,1,-1),Quaternion.identity) as GameObject;
+        bloodSlider = gameObjectBlood.GetComponent<UISlider>();
+        bloodSlider.value = ability.GetPower() / Const.maxPower;
     }
 
     void Update()
@@ -386,7 +394,8 @@ public class CellBug:MonoBehaviour
 
     private void UpDateTitle()
     {
-        titleLabel.transform.position = UICamera.mainCamera.ScreenToWorldPoint(Camera.main.WorldToScreenPoint(transform.position));
+        titleLabel.transform.position = UICamera.mainCamera.ScreenToWorldPoint(Camera.main.WorldToScreenPoint(transform.position)) + new Vector3(0,0.2f,0);
+        bloodSlider.transform.position = UICamera.mainCamera.ScreenToWorldPoint(Camera.main.WorldToScreenPoint(transform.position)) + new Vector3(0,0.1f,0);
     }
 
     //产生后代

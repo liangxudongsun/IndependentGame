@@ -8,7 +8,7 @@ public class Ability{
     //是否存活;
     private bool isLive = true;
     //当前能量和最大能量;
-    private int power = Const.startPower;
+    private float power = Const.startPower;
     //当前剩余存活时间;
     private float remainLiveTime = 300.0f;
  
@@ -108,6 +108,10 @@ public class Ability{
     public bool SetPower(int powerModify)
     {
         power += powerModify;
+        if (power > Const.maxPower) power = Const.maxPower;
+
+        mine.bloodSlider.value = (float)power / Const.maxPower;
+
         if (power <= 0)
         {
             isLive = false;
@@ -116,7 +120,7 @@ public class Ability{
         return true;
     }
 
-    public int GetPower()
+    public float GetPower()
     {
         return power;
     }
