@@ -1,6 +1,7 @@
 //核心机制
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class CellBug:MonoBehaviour
 {
@@ -15,24 +16,28 @@ public class CellBug:MonoBehaviour
 
     private bool isAI = true;
     private AIControl aiControl = new AIControl();
-    private GameObject cellLayer;
-    private GameObject foodLayer;
 
     public GameObject cellBugProfabs;
     public GameObject meatProfabs;
+    public GameObject titleProfabs;
 
+    private UILabel titleLabel = null;
+    private static int ID = 0;
     void Awake()
     {
         gameControl = (GameObject.Find("gameControl") as GameObject).GetComponent<GameControl>();
         gameControl.AddCellBugAll(this);
-        cellLayer = GameObject.Find("cellBugLayer") as GameObject;
-        foodLayer = GameObject.Find("foodLayer");
         ability.setMine(this);
+
+        ID++;
+        ability.id = ID;
     }
 
     void Start()
     {
-        
+        GameObject gameObject = Instantiate(titleProfabs, transform.position + new Vector3(0,1,-1), Quaternion.identity) as GameObject;
+        titleLabel = gameObject.GetComponent<UILabel>();
+        titleLabel.text = Const.GroupName[(int)ability.cellBugGroup] + ability.id;
     }
 
     void Update()
@@ -51,6 +56,7 @@ public class CellBug:MonoBehaviour
         ability.UpdateMateTime(Time.deltaTime);
         ClearMateList();
         UpdatePowerForTime();
+        UpDateTitle();
     }
 
     private void ClearMateList()
@@ -74,9 +80,10 @@ public class CellBug:MonoBehaviour
     }
 
     //移动
-    private void Move(Vector3 destination)
+    public void Move(Vector3 destination)
     {
         //涉及到寻路,移动速度将设置为寻路的速度
+        destination = new Vector3(destination.x,destination.y,this.transform.position.z);
         ability.targetPos = destination;
         ability.isArrive = false;
     }
@@ -90,7 +97,8 @@ public class CellBug:MonoBehaviour
     public void SetCamera(Camera camera)
     {
         this.camera = camera;
-        isAI = false;
+        if (camera == null) isAI = true;
+        else isAI = false;
     }
 
     //攻击
@@ -198,7 +206,6 @@ public class CellBug:MonoBehaviour
         {
             ability.requestedList.Add(cellBug);
         }
-        ability.status = Const.StutasEnum.ReceviceMataEnum;
     }
 
     //拒绝被召唤
@@ -217,9 +224,15 @@ public class CellBug:MonoBehaviour
     public void SearchMateStatus()
     {
         //如果死亡则停止寻找
-        if (!targetMateCellBug) return;
+        if (!targetMateCellBug)
+        {
+            StopMove();
+            stopMate();
+            return;
+        }
 
-        float dis = Vector3.Magnitude(new Vector3(targetMateCellBug.transform.position.x, targetMateCellBug.transform.position.y, transform.position.z)
+        float dis = Vector3.Magnitude(new Vector3(targetMateCellBug.transform.position.x, targetMateCellBug.transform.position.y, 
+            transform.position.z)
             - transform.position);
         if (dis <= 1)
         {
@@ -256,7 +269,6 @@ public class CellBug:MonoBehaviour
     public void Dead(Const.DeadEnum deadEnum)
     {
         GameObject obj = Instantiate(meatProfabs, new Vector3(transform.position.x, transform.position.y, meatProfabs.transform.position.z), Quaternion.identity) as GameObject;
-        obj.transform.parent = foodLayer.transform;
         Destroy(obj, 5.0f);
 
         gameControl.DeleteCellBugAll(this);
@@ -275,30 +287,29 @@ public class CellBug:MonoBehaviour
             tapedObject = hitInfo.collider.gameObject;
             if (Const.CellBugTag == tapedObject.tag && tapedObject != this.gameObject)
             {
-                if (tapedObject.GetComponent<CellBug>().GetAbility().cellBugGroup != ability.cellBugGroup)   
+                if (tapedObject.GetComponent<CellBug>().GetAbility().cellBugGroup != ability.cellBugGroup)
                 {
                     ReadyAttack(tapedObject);
                 }
 
-                if (tapedObject.GetComponent<CellBug>().GetAbility().cellBugGroup == ability.cellBugGroup 
+                if (tapedObject.GetComponent<CellBug>().GetAbility().cellBugGroup == ability.cellBugGroup
                     && ability.GetCanMate())
                 {
                     ReadyMate(tapedObject);
                 }
             }
-            
-            if (Const.FloorTag == tapedObject.tag)
-            {
-                if (ability.status != Const.StutasEnum.SearchMateEnum 
-                    && ability.status != Const.StutasEnum.ReceviceMataEnum)
-                    ability.status = Const.StutasEnum.IdleEnum;
-                Move(tapPosition);
-            }
-            
+
             if (Const.FoodTag == tapedObject.tag)
             {
                 ReadyEat(tapedObject);
             }
+        }
+        else
+        {
+            if (ability.status != Const.StutasEnum.SearchMateEnum
+                && ability.status != Const.StutasEnum.ReceviceMataEnum)
+                ability.status = Const.StutasEnum.IdleEnum;
+            Move(tapPosition);
         }
     }
 
@@ -373,21 +384,27 @@ public class CellBug:MonoBehaviour
         }
     }
 
+    private void UpDateTitle()
+    {
+        titleLabel.transform.position = UICamera.mainCamera.ScreenToWorldPoint(Camera.main.WorldToScreenPoint(transform.position));
+    }
+
     //产生后代
     private void RaiseUpSeed(CellBug cellBug)
     {
+        ability.status = Const.StutasEnum.IdleEnum;
+
         int birthNum = Const.geneArray[(int)Const.GenesEnum.BrithNumEnum].GetBirthNum(this);
         for (int i = 0; i < birthNum; i++)
         {
             GameObject bug = Instantiate(cellBugProfabs, this.transform.position, Quaternion.identity) as GameObject;
             CellBug temCellBug = bug.GetComponent<CellBug>();
 
-            temCellBug.transform.parent = cellLayer.transform;
-
             int[] lineOne = this.GetAbility().GetDna().DnaVariation();
             int[] lineTwo = cellBug.GetAbility().GetDna().DnaVariation();
-
             temCellBug.GetAbility().SetDNA(lineOne, lineTwo);
+
+            temCellBug.GetAbility().cellBugGroup = this.ability.cellBugGroup;
         }
     }
 }

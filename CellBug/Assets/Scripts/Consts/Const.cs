@@ -5,7 +5,6 @@ public static class Const
 
     public static string CellBugTag = "CellBugTag";
     public static string FoodTag = "FoodTag";
-    public static string FloorTag = "FloorTag";
 
     public static int DnaLineLength = 8;
 	public static float MaleTime = 30.0f;
@@ -20,8 +19,8 @@ public static class Const
     public static float foodCreaterTime = 10.0f;//食物生成间隔
     public static float timeForClearList = 10.0f;//多久清理一次配偶列表
     public static int startPower = 20;
-    public static int plantPower = 100;
-    public static int meatPower = 200;
+    public static int plantPower = 50;
+    public static int meatPower = 100;
 
     public static int lowSpeed = 1, middleSpeed = 2, highSpeed = 3;
     public static string oneMusic = "", twoMusic = "", ThreeMusic = "";
@@ -57,12 +56,14 @@ public static class Const
 
     public enum CellBugGroup
     {
-        MineEnum,
+        GodChildEnum,
         OrcEnum,
         HumanEnum,
         EidolonEnum,
     };
 
+    public static string[] GroupName = new string[]{"GodChild","Orc","Human","Eidolon"};
+ 
     public enum FoodEnum
     {
         MeatEnum,

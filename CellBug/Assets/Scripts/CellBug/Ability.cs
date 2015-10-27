@@ -25,14 +25,15 @@ public class Ability{
     public Vector3 targetPos = Vector3.zero;
     /// <¹ØÓÚÒÆ¶¯>
    
-    public Const.CellBugGroup cellBugGroup = Const.CellBugGroup.MineEnum;
+    public Const.CellBugGroup cellBugGroup = Const.CellBugGroup.GodChildEnum;
     public Const.StutasEnum status = Const.StutasEnum.IdleEnum;
 
     private Dna dna = new Dna();
-
+    public int id = 0;
     public void setMine(CellBug mine)
     {
         this.mine = mine;
+        dna.cellbug = mine;
     }
 
     public void TimeDrive(float deltaTime)

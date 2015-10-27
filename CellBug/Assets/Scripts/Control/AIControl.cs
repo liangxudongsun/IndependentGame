@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Runtime;
+using UnityEngine;
 using System.Collections;
 
 public class AIControl{
@@ -6,9 +8,18 @@ public class AIControl{
     private CellBug mate = null;
     private Food food = null;
     private CellBug cellBugEnemy = null;
+    private Vector3 targetPosition = new Vector3(0,0,-2);
+    private float createTargetTime = 2.0f;
 
     public void UpdateStatus(CellBug cellBug)
     {
+        if (createTargetTime <= 0.0f)
+        {
+            CreateTargetPosition(cellBug);
+            createTargetTime = 3.0f;
+        }
+        createTargetTime -= Time.deltaTime;
+
         Const.StutasEnum status = cellBug.GetAbility().status;
         switch (status)
         {
@@ -38,14 +49,22 @@ public class AIControl{
 
     private void CheckPower(CellBug cellBug)
     {
+        //无所事事时
+        if (cellBug.GetAbility().isArrive)
+        {
+            cellBug.Move(targetPosition);
+        }
+        
         //寻找配偶
         mate = cellBug.GetGameControl().SearchMate(cellBug);
-        if (cellBug.GetAbility().GetPower() >= Const.powerForMate && cellBug.GetAbility().GetCanMate())
+        if (mate != null 
+            && cellBug.GetAbility().GetPower() >= Const.powerForMate 
+            && cellBug.GetAbility().GetCanMate())
         {
             cellBug.ReadyMate(mate.gameObject);
             return;
         }
-
+        
         //寻找食物
         food = cellBug.GetGameControl().SearchFoodWithDis(cellBug, Const.disForEatFood);
         if (food && cellBug.GetAbility().GetPower() < Const.powerForStarve)
@@ -56,14 +75,11 @@ public class AIControl{
 
         //寻找敌人杀死来食用
         cellBugEnemy = cellBug.GetGameControl().SearchEnemyWithDis(cellBug, Const.disForEatEnemy);
-        if (cellBugEnemy && cellBug.GetAbility().GetPower() < Const.powerForStarve)
+        if (cellBugEnemy!= null && cellBug.GetAbility().GetPower() < Const.powerForStarve)
         {
             cellBug.ReadyAttack(cellBugEnemy.gameObject);
             return;
         }
-
-        //无所事事时
-
     }
 
     public void UpdatePosition(CellBug cellBug)
@@ -83,6 +99,15 @@ public class AIControl{
                 cellBug.GetAbility().isArrive = true;
             }
         }
+    }
+
+    private void CreateTargetPosition(CellBug cellBug)
+    {
+        int seed = (int)DateTime.Now.Ticks + cellBug.GetAbility().id * 10;
+        System.Random random = new System.Random(seed);
+        int x = random.Next(-50,50);
+        int y = random.Next(-50,50);
+        targetPosition = new Vector3(x,y,cellBug.transform.position.z);
     }
 }
 

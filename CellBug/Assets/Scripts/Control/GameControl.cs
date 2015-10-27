@@ -6,9 +6,8 @@ public class GameControl : MonoBehaviour {
 
     private ArrayList cellBugAllList = new ArrayList();   //所有精灵集合
     private ArrayList foodArrayList = new ArrayList();     //食物集合
-
     private CellBug nowCellBug = null;
-
+    private int nowCellBugIndex = 0;
     void Awake()
     {
 
@@ -46,10 +45,11 @@ public class GameControl : MonoBehaviour {
         for (int i = 0; i < cellBugAllList.Count;i++)
         {
             CellBug bug = cellBugAllList[i] as CellBug;
-            if (bug && bug.GetAbility().cellBugGroup == Const.CellBugGroup.MineEnum)
+            if (bug && bug.GetAbility().cellBugGroup == Const.CellBugGroup.GodChildEnum)
             {
                 nowCellBug = bug; 
                 nowCellBug.SetCamera(Camera.main);
+                nowCellBugIndex = i;
                 return;
             }
             continue;
@@ -76,8 +76,8 @@ public class GameControl : MonoBehaviour {
 
         if (foodList.Count != 0)
         {
-            int seed = (int)DateTime.Now.Ticks;
-            //那条链返回
+            int seed = (int)DateTime.Now.Ticks + cellBug.GetAbility().id * 10;
+            
             System.Random ranWhatIndex = new System.Random(seed);
             int num = ranWhatIndex.Next(1,foodList.Count + 1);
             Food food = foodList[num - 1] as Food;
@@ -106,7 +106,7 @@ public class GameControl : MonoBehaviour {
 
         if (enemyBugList.Count != 0)
         {
-            int seed = (int)DateTime.Now.Ticks;
+            int seed = (int)DateTime.Now.Ticks + cellBug.GetAbility().id * 10;
             //那条链返回
             System.Random ranWhatIndex = new System.Random(seed);
             int num = ranWhatIndex.Next(1, enemyBugList.Count + 1);
@@ -127,7 +127,8 @@ public class GameControl : MonoBehaviour {
             CellBug tempBug = cellBugAllList[i] as CellBug;
             if (tempBug.GetAbility().status != Const.StutasEnum.ReceviceMataEnum 
                 && tempBug.GetAbility().status != Const.StutasEnum.SearchMateEnum
-                && tempBug.GetAbility().cellBugGroup == group)
+                && tempBug.GetAbility().cellBugGroup == group
+                && tempBug != cellBug)
             {
                 mateBugList.Add(tempBug);
             }
@@ -135,7 +136,7 @@ public class GameControl : MonoBehaviour {
 
         if (mateBugList.Count != 0)
         {
-            int seed = (int)DateTime.Now.Ticks;
+            int seed = (int)DateTime.Now.Ticks + 10 * cellBug.GetAbility().id;
             //那条链返回
             System.Random ranWhatIndex = new System.Random(seed);
             int num = ranWhatIndex.Next(1, mateBugList.Count + 1);
@@ -144,6 +145,25 @@ public class GameControl : MonoBehaviour {
         }
 
         return null;
+    }
+
+    public void Change()
+    {
+        for (int i = (nowCellBugIndex+1)%cellBugAllList.Count; i < cellBugAllList.Count; i++)
+        {
+            if (i == nowCellBugIndex) return;
+            CellBug bug = cellBugAllList[i] as CellBug;
+            if (bug.GetAbility().cellBugGroup == Const.CellBugGroup.GodChildEnum
+                && bug != nowCellBug)
+            {
+                    nowCellBugIndex = i;
+                    nowCellBug.SetCamera(null);
+                    nowCellBug = bug;
+                    bug.SetCamera(Camera.main);
+                    return;
+            }
+            if (i == cellBugAllList.Count - 1)i = -1;
+        }
     }
 
     public void AddCellBugAll(CellBug cellBug)
