@@ -12,36 +12,37 @@ public class CellBug:MonoBehaviour
     private CellBug targetEnemy = null;
     private Food targetFood = null;
     private CellBug targetMateCellBug = null;  //当前主动召唤的配偶
-    private float timeforpower = Const.timeForPowerDelete;
+    private float timeforpower = Const.timeForPowerDelete;  //每隔多少秒减血
 
     private bool isAI = true;
     private AIControl aiControl = new AIControl();
 
     public GameObject cellBugProfabs;
     public GameObject meatProfabs;
+
     public GameObject titleProfabs;
     public GameObject bloodProfabs;
-
     private UILabel titleLabel = null;
-    public UISlider bloodSlider = null;
+    private UISlider bloodSlider = null;
 
     private static int ID = 0;
 
     void Awake()
     {
-        gameControl = (GameObject.Find("gameControl") as GameObject).GetComponent<GameControl>();
-        gameControl.AddCellBugAll(this);
         ability.setMine(this);
 
         ID++;
-        ability.id = ID;
+        ability.SetId(ID);
     }
 
     void Start()
     {
+        gameControl = (GameObject.Find("gameControl") as GameObject).GetComponent<GameControl>();
+        gameControl.AddCellBugAll(this);
+
         GameObject gameObjectTitle = Instantiate(titleProfabs, transform.position + new Vector3(0,1,-1), Quaternion.identity) as GameObject;
         titleLabel = gameObjectTitle.GetComponent<UILabel>();
-        titleLabel.text = Const.GroupName[(int)ability.cellBugGroup] + ability.id;
+        titleLabel.text = Const.GroupName[(int)ability.GetGroup()] + "id:" +ability.GetId();
 
         GameObject gameObjectBlood = Instantiate(bloodProfabs,transform.position + new Vector3(0,1,-1),Quaternion.identity) as GameObject;
         bloodSlider = gameObjectBlood.GetComponent<UISlider>();
@@ -62,19 +63,8 @@ public class CellBug:MonoBehaviour
         }
 
         ability.UpdateMateTime(Time.deltaTime);
-        ClearMateList();
         UpdatePowerForTime();
         UpDateTitle();
-    }
-
-    private void ClearMateList()
-    {
-        ability.timeForClearList-= Time.deltaTime;
-        if (ability.timeForClearList <= 0)
-        {
-            ability.timeForClearList = Const.timeForClearList;
-            ability.requestedList.Clear();
-        }
     }
 
     private void UpdatePowerForTime()
@@ -83,7 +73,8 @@ public class CellBug:MonoBehaviour
         if (timeforpower <= 0)
         {
             timeforpower = Const.timeForPowerDelete;
-            if (!ability.SetPower(-1)) this.Dead(Const.DeadEnum.StarveEnum);
+            float photosynthesisPower = Const.geneArray[(int)Const.GenesEnum.PhotosynthesisEnum].GetPhotosynthesis(this);
+            if (!ability.SetPower(-1.0f + photosynthesisPower)) this.Dead(Const.DeadEnum.StarveEnum);
         }
     }
 
@@ -113,7 +104,11 @@ public class CellBug:MonoBehaviour
     public void Attack()
     {
         //如果死亡则停止攻击
-        if (!targetEnemy) return;
+        if (!targetEnemy) 
+        {
+            gameControl.AlertVision(this,"敌人已死亡");
+            return;
+        }
         float dis = Vector3.Magnitude(new Vector3(targetEnemy.transform.position.x, targetEnemy.transform.position.y, transform.position.z)
                     - transform.position);
         if (dis <= 1) 
@@ -122,8 +117,9 @@ public class CellBug:MonoBehaviour
             bool isLive = targetEnemy.Attacked(this);
             if (!isLive)
             {
-                ability.status = Const.StutasEnum.IdleEnum;
+                ability.SetStatus(Const.StutasEnum.IdleEnum);
                 targetEnemy = null;
+                gameControl.AlertVision(this,"杀死敌人");
             }
         }
         else { Move(targetEnemy.transform.position); } 
@@ -135,7 +131,7 @@ public class CellBug:MonoBehaviour
         int attackForce = Const.geneArray[(int)Const.GenesEnum.AttackForceEnum].GetAttackForce(cellBug);
         bool isLive = ability.SetPower(-attackForce);
         if (!isLive) this.Dead(Const.DeadEnum.KilledEnum);
-        if (isLive) this.ReadyAttack(cellBug.gameObject);
+        if (isLive && this.ability.GetStatus() != Const.StutasEnum.AttackEnum) this.ReadyAttack(cellBug.gameObject);
         return isLive;
     }
 
@@ -145,7 +141,11 @@ public class CellBug:MonoBehaviour
         //需要调用基因查看
         if (!targetFood) return;
         int powerFrom = Const.geneArray[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(this);
-        if (powerFrom == 2) return;
+        if (powerFrom == 2)
+        {
+            gameControl.AlertVision(this,"您已进化为完全食肉动物");
+            return;
+        }
 
         float dis = Vector3.Magnitude(new Vector3(targetFood.transform.position.x, targetFood.transform.position.y, transform.position.z) 
             - transform.position);
@@ -153,7 +153,7 @@ public class CellBug:MonoBehaviour
         { 
             StopMove();
             this.GetAbility().SetPower(targetFood.GetPower());
-            ability.status = Const.StutasEnum.IdleEnum;
+            ability.SetStatus(Const.StutasEnum.IdleEnum);
             targetFood.Eated();
             targetFood = null;
         }
@@ -168,15 +168,15 @@ public class CellBug:MonoBehaviour
         int powerFrom = Const.geneArray[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(this);
         if (powerFrom == 0)
         {
-            Debug.Log("你还没有进化出食肉能力");
+            gameControl.AlertVision(this,"您还没有进化出食肉能力");
             targetFood = null;
-            ability.status = Const.StutasEnum.IdleEnum;
+            ability.SetStatus(Const.StutasEnum.IdleEnum);
             return; 
         }
 
         float dis = Vector3.Magnitude(new Vector3(targetFood.transform.position.x, targetFood.transform.position.y, transform.position.z)
             - transform.position);
-        if (dis <= 1) 
+        if (dis <= 2) 
         {
             StopMove();
             int antibiotic = Const.geneArray[(int)Const.GenesEnum.AntibioticEnum].GetAntibiotic(this);
@@ -188,44 +188,11 @@ public class CellBug:MonoBehaviour
             { 
                 this.Dead(Const.DeadEnum.PoisonEnum); 
             }
-            ability.status = Const.StutasEnum.IdleEnum;
+            ability.SetStatus(Const.StutasEnum.IdleEnum);
             targetFood.Eated();
             targetFood = null;
         }
         else { Move(targetFood.transform.position); }
-    }
-
-    //进入发情期
-    public void StartCallMate()
-    {
-
-    }
-
-    //发情结束
-    public void StopCallMate()
-    {
-
-    }
-    
-    //接收到召唤
-    public void CallProCast(CellBug cellBug)
-    {
-        if (!ability.requestedList.Contains(cellBug))
-        {
-            ability.requestedList.Add(cellBug);
-        }
-    }
-
-    //拒绝被召唤
-    public void refuseCallMate()
-    {
-        ability.status = Const.StutasEnum.IdleEnum; 
-    }
-
-    //接受召唤
-    public void AcceptCallMate()
-    {
-        ability.status = Const.StutasEnum.IdleEnum;
     }
 
     //处于寻找配偶状态
@@ -245,7 +212,6 @@ public class CellBug:MonoBehaviour
         if (dis <= 1)
         {
             StopMove();
-            targetMateCellBug.CallProCast(this);
             RaiseUpSeed(targetMateCellBug);
             stopMate();
         }
@@ -259,7 +225,7 @@ public class CellBug:MonoBehaviour
     private void stopMate()
     {
         targetMateCellBug = null;
-        ability.status = Const.StutasEnum.IdleEnum;
+        ability.SetStatus(Const.StutasEnum.IdleEnum);
         ability.SetCanMate(false);
     }
 
@@ -273,11 +239,20 @@ public class CellBug:MonoBehaviour
         return gameControl;
     }
 
+    public UISlider GetBloodSlider()
+    {
+        return bloodSlider;
+    }
+
     //死亡
     public void Dead(Const.DeadEnum deadEnum)
     {
         GameObject obj = Instantiate(meatProfabs, new Vector3(transform.position.x, transform.position.y, meatProfabs.transform.position.z), Quaternion.identity) as GameObject;
-        Destroy(obj, 5.0f);
+        Meat meat = obj.GetComponent<Meat>();
+        meat.SetPoison(Const.geneArray[(int)Const.GenesEnum.PoisonEnum].GetPoison(this));
+
+        if (titleLabel) Destroy(titleLabel.gameObject);
+        if (bloodSlider) Destroy(bloodSlider.gameObject);
 
         gameControl.DeleteCellBugAll(this);
         Destroy(this.gameObject,0.5f);
@@ -295,15 +270,15 @@ public class CellBug:MonoBehaviour
             tapedObject = hitInfo.collider.gameObject;
             if (Const.CellBugTag == tapedObject.tag && tapedObject != this.gameObject)
             {
-                if (tapedObject.GetComponent<CellBug>().GetAbility().cellBugGroup != ability.cellBugGroup)
+                if (tapedObject.GetComponent<CellBug>().GetAbility().GetGroup() != ability.GetGroup())
                 {
                     ReadyAttack(tapedObject);
                 }
 
-                if (tapedObject.GetComponent<CellBug>().GetAbility().cellBugGroup == ability.cellBugGroup
-                    && ability.GetCanMate())
+                if (tapedObject.GetComponent<CellBug>().GetAbility().GetGroup() == ability.GetGroup())
                 {
-                    ReadyMate(tapedObject);
+                    if (ability.GetCanMate()) ReadyMate(tapedObject);
+                    else gameControl.AlertVision(this, "未到发情期");
                 }
             }
 
@@ -314,9 +289,7 @@ public class CellBug:MonoBehaviour
         }
         else
         {
-            if (ability.status != Const.StutasEnum.SearchMateEnum
-                && ability.status != Const.StutasEnum.ReceviceMataEnum)
-                ability.status = Const.StutasEnum.IdleEnum;
+            ability.SetStatus(Const.StutasEnum.IdleEnum);
             Move(tapPosition);
         }
     }
@@ -324,33 +297,31 @@ public class CellBug:MonoBehaviour
     public void ReadyMate(GameObject tapedObject)
     {
         targetMateCellBug = tapedObject.GetComponent<CellBug>() as CellBug;
-        ability.status = Const.StutasEnum.SearchMateEnum;
+        ability.SetStatus(Const.StutasEnum.SearchMateEnum);
         ability.SetCanMate(false);
     }
 
     public void ReadyAttack(GameObject tapedObject)
     {
         targetEnemy = tapedObject.GetComponent<CellBug>();
-        ability.status = Const.StutasEnum.AttackEnum;
+        ability.SetStatus(Const.StutasEnum.AttackEnum);
     }
 
     public void ReadyEat(GameObject tapedObject)
     {
         targetFood = tapedObject.GetComponent<Food>();
         if (targetFood.GetFoodType() == Const.FoodEnum.GrassEnum)
-            ability.status = Const.StutasEnum.EatPlantEnum;
+            ability.SetStatus(Const.StutasEnum.EatPlantEnum);
         if (targetFood.GetFoodType() == Const.FoodEnum.MeatEnum)
-            ability.status = Const.StutasEnum.EatMeatEnum;
+            ability.SetStatus(Const.StutasEnum.EatMeatEnum);
     }
 
     private void UpdateStatus()
     {
-        switch (this.GetAbility().status)
+        switch (this.GetAbility().GetStatus())
         {
         case Const.StutasEnum.IdleEnum:
         	break;
-        case Const.StutasEnum.ReceviceMataEnum:
-            break;
         case Const.StutasEnum.SearchMateEnum:
             SearchMateStatus();
             break;
@@ -384,7 +355,7 @@ public class CellBug:MonoBehaviour
             if (dir.x < 0) angle = 360 - angle;
             transform.eulerAngles = new Vector3(0, 0, Mathf.Lerp(transform.eulerAngles.z, angle, Time.deltaTime * 10));
 
-            transform.position += dir * ability.speed * Time.deltaTime;
+            transform.position += dir * ability.GetSpeed() * Time.deltaTime;
             if (Vector3.Distance(ability.targetPos, transform.position) <= 0.1f)
             {
                 ability.isArrive = true;
@@ -394,14 +365,16 @@ public class CellBug:MonoBehaviour
 
     private void UpDateTitle()
     {
-        titleLabel.transform.position = UICamera.mainCamera.ScreenToWorldPoint(Camera.main.WorldToScreenPoint(transform.position)) + new Vector3(0,0.2f,0);
-        bloodSlider.transform.position = UICamera.mainCamera.ScreenToWorldPoint(Camera.main.WorldToScreenPoint(transform.position)) + new Vector3(0,0.1f,0);
+        if (titleLabel)
+           titleLabel.transform.position = UICamera.mainCamera.ScreenToWorldPoint(Camera.main.WorldToScreenPoint(transform.position)) + new Vector3(0,0.2f,0); 
+        if (bloodSlider)
+           bloodSlider.transform.position = UICamera.mainCamera.ScreenToWorldPoint(Camera.main.WorldToScreenPoint(transform.position)) + new Vector3(0,0.1f,0);
     }
 
     //产生后代
     private void RaiseUpSeed(CellBug cellBug)
     {
-        ability.status = Const.StutasEnum.IdleEnum;
+        ability.SetStatus(Const.StutasEnum.IdleEnum);
 
         int birthNum = Const.geneArray[(int)Const.GenesEnum.BrithNumEnum].GetBirthNum(this);
         for (int i = 0; i < birthNum; i++)
@@ -412,8 +385,7 @@ public class CellBug:MonoBehaviour
             int[] lineOne = this.GetAbility().GetDna().DnaVariation();
             int[] lineTwo = cellBug.GetAbility().GetDna().DnaVariation();
             temCellBug.GetAbility().SetDNA(lineOne, lineTwo);
-
-            temCellBug.GetAbility().cellBugGroup = this.ability.cellBugGroup;
+            temCellBug.GetAbility().SetGroup(this.ability.GetGroup());
         }
     }
 }

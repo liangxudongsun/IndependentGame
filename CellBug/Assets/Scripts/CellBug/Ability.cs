@@ -15,21 +15,19 @@ public class Ability{
     /// <关于求偶>
     private float mateTime = Const.MaleTime;//发情时间间隔
     private bool canMate = false;   //是否可主动求偶
-    public ArrayList requestedList = new ArrayList();
-    public float timeForClearList = Const.timeForClearList;//多久清理一次列表
     /// <关于求偶>
 
     /// <关于移动>
-    public int speed = 5;
     public bool isArrive = true;
     public Vector3 targetPos = Vector3.zero;
     /// <关于移动>
-   
-    public Const.CellBugGroup cellBugGroup = Const.CellBugGroup.GodChildEnum;
-    public Const.StutasEnum status = Const.StutasEnum.IdleEnum;
 
     private Dna dna = new Dna();
-    public int id = 0;
+    private Const.CellBugGroup cellBugGroup = Const.CellBugGroup.GodChildEnum;
+    private Const.StutasEnum status = Const.StutasEnum.IdleEnum;
+    private int id = 0;
+
+
     public void setMine(CellBug mine)
     {
         this.mine = mine;
@@ -105,12 +103,12 @@ public class Ability{
         return dna;
     }
 
-    public bool SetPower(int powerModify)
+    public bool SetPower(float powerModify)
     {
         power += powerModify;
         if (power > Const.maxPower) power = Const.maxPower;
 
-        mine.bloodSlider.value = (float)power / Const.maxPower;
+        mine.GetBloodSlider().value = power / Const.maxPower;
 
         if (power <= 0)
         {
@@ -139,9 +137,16 @@ public class Ability{
         mateTime -= time;
         if (canMate == false && mateTime <= 0)
         {
-            canMate = true;
+            SetCanMate(true);
             mateTime = Const.MaleTime;
         }
+    }
+
+    public int GetSpeed()
+    {
+        int speed = 0;
+        speed = Const.geneArray[(int)Const.GenesEnum.SpeedEnum].GetSpeed(mine);
+        return speed;
     }
 
     public bool GetCanMate()
@@ -152,5 +157,36 @@ public class Ability{
     public void SetCanMate(bool canMate)
     {
         this.canMate = canMate;
+    }
+
+    public void SetStatus(Const.StutasEnum status)
+    {
+        this.status = status;
+        mine.GetGameControl().StatusVision(mine);
+    }
+
+    public Const.StutasEnum GetStatus()
+    {
+        return status;
+    }
+
+    public void SetGroup(Const.CellBugGroup group)
+    {
+        this.cellBugGroup = group;
+    }
+
+    public Const.CellBugGroup GetGroup()
+    {
+        return cellBugGroup;
+    }
+
+    public void SetId(int id)
+    {
+        this.id = id;
+    }
+
+    public int GetId()
+    {
+        return id;
     }
 }

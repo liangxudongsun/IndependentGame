@@ -48,7 +48,7 @@ public class Dna
 	//产生后代时放出的DNA链
 	public int[] DnaVariation()
 	{
-		int seed = (int)DateTime.Now.Ticks + 10 * cellbug.GetAbility().id;
+		int seed = (int)DateTime.Now.Ticks + 10 * cellbug.GetAbility().GetId();
 		//那条链返回
 		Random random = new Random(seed);
 		int numWhatLine = random.Next(1,3);

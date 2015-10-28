@@ -20,29 +20,27 @@ public class AIControl{
         }
         createTargetTime -= Time.deltaTime;
 
-        Const.StutasEnum status = cellBug.GetAbility().status;
+        Const.StutasEnum status = cellBug.GetAbility().GetStatus();
         switch (status)
         {
             case Const.StutasEnum.IdleEnum:
                 CheckPower(cellBug);
                 break;
-            case Const.StutasEnum.ReceviceMataEnum:
-                break;
             case Const.StutasEnum.SearchMateEnum:
                 if (mate){cellBug.SearchMateStatus();}
-                else { cellBug.GetAbility().status = Const.StutasEnum.IdleEnum;}
+                else { cellBug.GetAbility().SetStatus(Const.StutasEnum.IdleEnum);}
                 break;
             case Const.StutasEnum.AttackEnum:
                 if (cellBugEnemy){cellBug.Attack();}
-                else { cellBug.GetAbility().status = Const.StutasEnum.IdleEnum;}
+                else { cellBug.GetAbility().SetStatus(Const.StutasEnum.IdleEnum);}
                 break;
             case Const.StutasEnum.EatMeatEnum:
                 if (food){cellBug.EatMeat();}
-                else { cellBug.GetAbility().status = Const.StutasEnum.IdleEnum;}
+                else { cellBug.GetAbility().SetStatus(Const.StutasEnum.IdleEnum);}
                 break;
             case Const.StutasEnum.EatPlantEnum:
                 if (food) { cellBug.EatPlant(); }
-                else { cellBug.GetAbility().status = Const.StutasEnum.IdleEnum; }
+                else { cellBug.GetAbility().SetStatus(Const.StutasEnum.IdleEnum);}
                 break;
         }
     }
@@ -93,7 +91,7 @@ public class AIControl{
             if (dir.x < 0) angle = 360 - angle;
             cellBug.transform.eulerAngles = new Vector3(0, 0, Mathf.Lerp(cellBug.transform.eulerAngles.z, angle, Time.deltaTime * 10));
 
-            cellBug.transform.position += dir * cellBug.GetAbility().speed * Time.deltaTime;
+            cellBug.transform.position += dir * cellBug.GetAbility().GetSpeed() * Time.deltaTime;
             if (Vector3.Distance(cellBug.GetAbility().targetPos, cellBug.transform.position) <= 0.1f)
             {
                 cellBug.GetAbility().isArrive = true;
@@ -103,7 +101,7 @@ public class AIControl{
 
     private void CreateTargetPosition(CellBug cellBug)
     {
-        int seed = (int)DateTime.Now.Ticks + cellBug.GetAbility().id * 10;
+        int seed = (int)DateTime.Now.Ticks + cellBug.GetAbility().GetId() * 10;
         System.Random random = new System.Random(seed);
         int x = random.Next(-50,50);
         int y = random.Next(-50,50);

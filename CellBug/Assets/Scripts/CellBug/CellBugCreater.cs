@@ -37,6 +37,6 @@ public class CellBugCreater : MonoBehaviour {
         float z = cellBug.transform.position.z;
         Vector3 position = transform.position + new Vector3(dis,dis,z);
         CellBug bug = Instantiate(cellBug,position,Quaternion.identity) as CellBug;
-        bug.GetAbility().cellBugGroup = group;
+        bug.GetAbility().SetGroup(group);
     }
 }
