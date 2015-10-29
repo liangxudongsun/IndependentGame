@@ -8,7 +8,7 @@ public class Ability{
     //是否存活;
     private bool isLive = true;
     //当前能量和最大能量;
-    private float power = Const.startPower;
+    private float power = Const.StartPower;
     //当前剩余存活时间;
     private float remainLiveTime = 300.0f;
  
@@ -48,7 +48,7 @@ public class Ability{
     public void SetDNA(int[] DNALineOne, int[] DNALineTwo)
     {
         dna.SetDna(DNALineOne, DNALineTwo);
-
+        
         if (dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.SpeedEnum) == 1 
             || dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.SpeedEnum) == 1)
         {
@@ -96,6 +96,7 @@ public class Ability{
         {
             mine.transform.FindChild("song").gameObject.SetActive(true);
         }
+         
     }
 
     public Dna GetDna()
@@ -106,10 +107,8 @@ public class Ability{
     public bool SetPower(float powerModify)
     {
         power += powerModify;
-        if (power > Const.maxPower) power = Const.maxPower;
-
-        mine.GetBloodSlider().value = power / Const.maxPower;
-
+        if (power > Const.MaxPower) power = Const.MaxPower;
+        mine.GetBloodSlider().value = power / Const.MaxPower;
         if (power <= 0)
         {
             isLive = false;
@@ -145,7 +144,7 @@ public class Ability{
     public int GetSpeed()
     {
         int speed = 0;
-        speed = Const.geneArray[(int)Const.GenesEnum.SpeedEnum].GetSpeed(mine);
+        speed = Const.GeneArray[(int)Const.GenesEnum.SpeedEnum].GetSpeed(mine);
         return speed;
     }
 

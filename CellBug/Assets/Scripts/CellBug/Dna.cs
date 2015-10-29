@@ -69,9 +69,8 @@ public class Dna
 		}
 
 		//有没有发生突变
-		int numCanChange = random.Next(1,20);
-		
-		if(numCanChange >= 1 && numCanChange <= 10)
+		int numCanChange = random.Next(1,Const.VariationProbability + 1);
+		if(numCanChange == 1)
 		{
 			//突变
 			int numWhatDNA = random.Next(1,Const.DnaLineLength + 1);

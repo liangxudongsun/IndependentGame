@@ -14,7 +14,7 @@ public class Meat : Food {
 	void Start () {
         gameControl.AddFood(this);
         foodType = Const.FoodEnum.MeatEnum;
-        power = Const.meatPower;
+        power = Const.MeatPower;
         poison = 0;
     }
 	

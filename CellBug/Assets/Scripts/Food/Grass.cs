@@ -12,7 +12,7 @@ public class Grass : Food {
 	void Start () {
         gameControl.AddFood(this);
         foodType = Const.FoodEnum.GrassEnum;
-        power = Const.plantPower;
+        power = Const.PlantPower;
 	}
 	
 	// Update is called once per frame

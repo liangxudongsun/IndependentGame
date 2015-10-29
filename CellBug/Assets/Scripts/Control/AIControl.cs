@@ -9,16 +9,16 @@ public class AIControl{
     private Food food = null;
     private CellBug cellBugEnemy = null;
     private Vector3 targetPosition = new Vector3(0,0,-2);
-    private float createTargetTime = 2.0f;
+    private float createTargetTime = 0.0f;
 
     public void UpdateStatus(CellBug cellBug)
     {
+        createTargetTime -= Time.deltaTime;
         if (createTargetTime <= 0.0f)
         {
             CreateTargetPosition(cellBug);
-            createTargetTime = 3.0f;
+            createTargetTime = Const.TimeForCreatePosition;
         }
-        createTargetTime -= Time.deltaTime;
 
         Const.StutasEnum status = cellBug.GetAbility().GetStatus();
         switch (status)
@@ -27,20 +27,20 @@ public class AIControl{
                 CheckPower(cellBug);
                 break;
             case Const.StutasEnum.SearchMateEnum:
-                if (mate){cellBug.SearchMateStatus();}
-                else { cellBug.GetAbility().SetStatus(Const.StutasEnum.IdleEnum);}
+                SearchMate(cellBug);
+                cellBug.SearchMateStatus();
                 break;
             case Const.StutasEnum.AttackEnum:
-                if (cellBugEnemy){cellBug.Attack();}
-                else { cellBug.GetAbility().SetStatus(Const.StutasEnum.IdleEnum);}
+                SerarchEnemy(cellBug);
+                cellBug.Attack();
                 break;
             case Const.StutasEnum.EatMeatEnum:
-                if (food){cellBug.EatMeat();}
-                else { cellBug.GetAbility().SetStatus(Const.StutasEnum.IdleEnum);}
+                SearchFood(cellBug);
+                cellBug.EatMeat();
                 break;
             case Const.StutasEnum.EatPlantEnum:
-                if (food) { cellBug.EatPlant(); }
-                else { cellBug.GetAbility().SetStatus(Const.StutasEnum.IdleEnum);}
+                SearchFood(cellBug);
+                cellBug.EatPlant();
                 break;
         }
     }
@@ -48,36 +48,48 @@ public class AIControl{
     private void CheckPower(CellBug cellBug)
     {
         //无所事事时
-        if (cellBug.GetAbility().isArrive)
-        {
-            cellBug.Move(targetPosition);
-        }
-        
+        if (cellBug.GetAbility().isArrive)cellBug.Move(targetPosition);
+        if (SearchMate(cellBug)) return;
+        if (SearchFood(cellBug)) return;
+        if (SerarchEnemy(cellBug)) return;
+    }
+
+    private bool SearchMate(CellBug cellBug)
+    {
         //寻找配偶
         mate = cellBug.GetGameControl().SearchMate(cellBug);
-        if (mate != null 
-            && cellBug.GetAbility().GetPower() >= Const.powerForMate 
+        if (mate != null
+            && cellBug.GetAbility().GetPower() >= Const.PowerForMate
             && cellBug.GetAbility().GetCanMate())
         {
             cellBug.ReadyMate(mate.gameObject);
-            return;
+            return true;
         }
-        
+        return false;
+    }
+
+    private bool SearchFood(CellBug cellBug)
+    {
         //寻找食物
-        food = cellBug.GetGameControl().SearchFoodWithDis(cellBug, Const.disForEatFood);
-        if (food && cellBug.GetAbility().GetPower() < Const.powerForStarve)
+        food = cellBug.GetGameControl().SearchFoodWithDis(cellBug, Const.DisForEatFood);
+        if (food && cellBug.GetAbility().GetPower() < Const.PowerForStarve)
         {
             cellBug.ReadyEat(food.gameObject);
-            return;
+            return true;
         }
+        return false;
+    }
 
+    private bool SerarchEnemy(CellBug cellBug)
+    {
         //寻找敌人杀死来食用
-        cellBugEnemy = cellBug.GetGameControl().SearchEnemyWithDis(cellBug, Const.disForEatEnemy);
-        if (cellBugEnemy!= null && cellBug.GetAbility().GetPower() < Const.powerForStarve)
+        cellBugEnemy = cellBug.GetGameControl().SearchEnemyWithDis(cellBug, Const.DisForEatEnemy);
+        if (cellBugEnemy != null && cellBug.GetAbility().GetPower() < Const.PowerForStarve)
         {
             cellBug.ReadyAttack(cellBugEnemy.gameObject);
-            return;
+            return true;
         }
+        return false;
     }
 
     public void UpdatePosition(CellBug cellBug)

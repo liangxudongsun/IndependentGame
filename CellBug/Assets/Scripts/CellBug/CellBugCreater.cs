@@ -6,14 +6,12 @@ public class CellBugCreater : MonoBehaviour {
 
     public CellBug cellBug;
     public Const.CellBugGroup group = Const.CellBugGroup.GodChildEnum;
-    public int cellBugNum = 0;
-    public float createTimePur = 5.0f;
 
+    private int cellBugNum = Const.CellBugCreaterNum;
     private bool isCreate = true;
-    private float timeForCreate;
+    private float timeForCreate = 0.0f;
 	// Use this for initialization
 	void Start () {
-        timeForCreate = createTimePur;
     }
 	
 	// Update is called once per frame
@@ -23,7 +21,7 @@ public class CellBugCreater : MonoBehaviour {
         if (timeForCreate <= 0)
         {
             CreateCellBug();
-            timeForCreate = createTimePur;
+            timeForCreate = Const.CellBugCreaterTime;
             cellBugNum--;
             if (cellBugNum <= 0) isCreate = false;
         }        

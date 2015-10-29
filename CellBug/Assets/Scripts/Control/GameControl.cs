@@ -15,6 +15,7 @@ public class GameControl : MonoBehaviour
     public UISprite gameStatus;
     public UILabel alertLabel;
     public UILabel[] dnaLabelArray;
+    public UILabel[] geneLabelArray;
     public UILabel[] otherGroupLabelArray;
     void Awake()
     {
@@ -29,12 +30,13 @@ public class GameControl : MonoBehaviour
             SearchCellBug();
             return;
         }
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0)
+            && UICamera.hoveredObject == null)
         {
             nowCellBug.TapCheck(Camera.main.ScreenToWorldPoint(Input.mousePosition));
         }
 
-        TimeVision(Time.time);
+        TimeVision(Time.timeSinceLevelLoad);
     }
 
     public CellBug GetNowCellBug()
@@ -59,7 +61,7 @@ public class GameControl : MonoBehaviour
             if (bug && bug.GetAbility().GetGroup() == Const.CellBugGroup.GodChildEnum)
             {
                 nowCellBug = bug;
-                nowCellBug.SetCamera(Camera.main);
+                nowCellBug.SetIsAI(false);
                 nowCellBugIndex = i;
                 break;
             }
@@ -73,7 +75,7 @@ public class GameControl : MonoBehaviour
     {
         ArrayList foodList = new ArrayList();
 
-        int powerFrom = Const.geneArray[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(cellBug);
+        int powerFrom = Const.GeneArray[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(cellBug);
         for (int i = 0; i < foodArrayList.Count; i++)
         {
             Food tempFood = foodArrayList[i] as Food;
@@ -88,11 +90,14 @@ public class GameControl : MonoBehaviour
 
         if (foodList.Count != 0)
         {
-            int seed = (int)DateTime.Now.Ticks + cellBug.GetAbility().GetId() * 10;
-
-            System.Random ranWhatIndex = new System.Random(seed);
-            int num = ranWhatIndex.Next(1, foodList.Count + 1);
-            Food food = foodList[num - 1] as Food;
+            Food food = foodList[0] as Food;
+            for (int m = 1; m < foodList.Count; m++)
+            {
+                Food tempFood = foodList[m] as Food;
+                if (Vector3.Magnitude(cellBug.transform.position - tempFood.transform.position)
+                    < Vector3.Magnitude(cellBug.transform.position - food.transform.position))
+                    food = tempFood;
+            }
             return food;
         }
         return null;
@@ -103,27 +108,31 @@ public class GameControl : MonoBehaviour
     {
         ArrayList enemyBugList = new ArrayList();
 
-        int powerFrom = Const.geneArray[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(cellBug);
+        int powerFrom = Const.GeneArray[(int)Const.GenesEnum.PowerGetFromEnum].GetPowerGetFrom(cellBug);
         if (powerFrom == 0) return null;
 
         for (int i = 0; i < cellBugAllList.Count; i++)
         {
-            CellBug tempEnemy = cellBugAllList[i] as CellBug;
-            if (cellBug.GetAbility().GetGroup() == tempEnemy.GetAbility().GetGroup()) continue;
-            if (Vector3.Magnitude(cellBug.transform.position - tempEnemy.transform.position) < dis)
+            CellBug tempCellBug = cellBugAllList[i] as CellBug;
+            if (cellBug.GetAbility().GetGroup() == tempCellBug.GetAbility().GetGroup()) continue;
+            if (Vector3.Magnitude(cellBug.transform.position - tempCellBug.transform.position) < dis
+                && tempCellBug.GetAbility().GetPower() < cellBug.GetAbility().GetPower())
             {
-                enemyBugList.Add(tempEnemy);
+                enemyBugList.Add(tempCellBug);
             }
         }
 
         if (enemyBugList.Count != 0)
         {
-            int seed = (int)DateTime.Now.Ticks + cellBug.GetAbility().GetId() * 10;
-            //那条链返回
-            System.Random ranWhatIndex = new System.Random(seed);
-            int num = ranWhatIndex.Next(1, enemyBugList.Count + 1);
-            CellBug bug = enemyBugList[num - 1] as CellBug;
-            return bug;
+            CellBug enemy = enemyBugList[0] as CellBug;
+            for (int m = 1; m < enemyBugList.Count; m++)
+            {
+                CellBug tempEnemy = enemyBugList[m] as CellBug;
+                if (Vector3.Magnitude(cellBug.transform.position - tempEnemy.transform.position)
+                    < Vector3.Magnitude(cellBug.transform.position - enemy.transform.position))
+                    enemy = tempEnemy;
+            }
+            return enemy;
         }
         return null;
     }
@@ -147,14 +156,16 @@ public class GameControl : MonoBehaviour
 
         if (mateBugList.Count != 0)
         {
-            int seed = (int)DateTime.Now.Ticks + 10 * cellBug.GetAbility().GetId();
-            //那条链返回
-            System.Random ranWhatIndex = new System.Random(seed);
-            int num = ranWhatIndex.Next(1, mateBugList.Count + 1);
-            CellBug bug = mateBugList[num - 1] as CellBug;
-            return bug;
+            CellBug mate = mateBugList[0] as CellBug;
+            for (int m = 1; m < mateBugList.Count; m++)
+            {
+                CellBug tempMate = mateBugList[m] as CellBug;
+                if (Vector3.Magnitude(cellBug.transform.position - tempMate.transform.position)
+                    < Vector3.Magnitude(cellBug.transform.position - mate.transform.position))
+                    mate = tempMate;
+            }
+            return mate;
         }
-
         return null;
     }
 
@@ -168,28 +179,29 @@ public class GameControl : MonoBehaviour
                 && bug != nowCellBug)
             {
                 nowCellBugIndex = i;
-                nowCellBug.SetCamera(null);
+                nowCellBug.SetIsAI(true);
                 nowCellBug = bug;
-                bug.SetCamera(Camera.main);
+                bug.SetIsAI(false);
                 break;
             }
             if (i == cellBugAllList.Count - 1) i = -1;
         }
-
         DnaVision();
     }
 
     public void AddCellBugAll(CellBug cellBug)
     {
         cellBugAllList.Add(cellBug);
+        GeneLiveVision(cellBug);
         GroupNumChangeVision();
     }
 
     public void DeleteCellBugAll(CellBug cellBug)
     {
         if (cellBug == nowCellBug) nowCellBug = null;
+        GeneLiveVision(cellBug);
         cellBugAllList.Remove(cellBug);
-        GroupNumChangeVision();
+        if (GroupNumChangeVision() == 0) Application.LoadLevel("03");
     }
 
     public void AddFood(Food food)
@@ -223,7 +235,7 @@ public class GameControl : MonoBehaviour
         gameTime.text = "" + hour + ":" + minte + ":" + second;
     }
 
-    private void GroupNumChangeVision(Const.CellBugGroup group = Const.CellBugGroup.GodChildEnum)
+    private int GroupNumChangeVision(Const.CellBugGroup group = Const.CellBugGroup.GodChildEnum)
     {
         int numGodChild = 0;
         int numOrc = 0;
@@ -239,10 +251,12 @@ public class GameControl : MonoBehaviour
             if (bug.GetAbility().GetGroup() == Const.CellBugGroup.EidolonEnum) numEidolon++;
         }
 
-        groupNum.text = "group number:" + numGodChild;
+        groupNum.text = "GodChild number:" + numGodChild;
         otherGroupLabelArray[0].text = "Orc number:" + numOrc;
         otherGroupLabelArray[1].text = "Human number:" + numHuman;
         otherGroupLabelArray[2].text = "Eidolon number:" + numEidolon;
+
+        return numGodChild;
     }
 
     public void AlertVision(CellBug cellBug,string message)
@@ -279,6 +293,35 @@ public class GameControl : MonoBehaviour
             case Const.StutasEnum.SearchMateEnum:
                 gameStatus.spriteName = "search";
                 break;
+        }
+    }
+
+    private void GeneLiveVision(CellBug cellBug)
+    {
+        if (nowCellBug == null 
+            || cellBug.GetAbility().GetGroup() != nowCellBug.GetAbility().GetGroup()) 
+            return;
+
+        int groupNum = 0;
+        int[] gene = new int[Const.DnaLineLength];
+        for (int i = 0; i < cellBugAllList.Count; i++)
+        {
+            CellBug bug = cellBugAllList[i] as CellBug;
+            if (bug.GetAbility().GetGroup() == nowCellBug.GetAbility().GetGroup())
+            {
+                groupNum++;
+                Dna tempDna = bug.GetAbility().GetDna();
+
+                for (int index = 0; index < gene.Length; index++)
+                {
+                    gene[index] += (tempDna.GetDnaLine(Const.DnaLineEnum.OneEnum)[index] + tempDna.GetDnaLine(Const.DnaLineEnum.TwoEnum)[index]);
+                }
+            }
+        }
+
+        for (int m = 0; m < geneLabelArray.Length; m++ )
+        {
+            geneLabelArray[m].text = Const.DnaName[m] + ":" + gene[m] / (2.0 * groupNum) * 100 + "%";
         }
     }
 }

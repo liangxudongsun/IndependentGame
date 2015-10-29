@@ -6,7 +6,7 @@ public class FoodCreater : MonoBehaviour {
     public Food[] foodArray;
 
     private Food nowFood = null;
-    private float foodCreaterTime = Const.foodCreaterTime;
+    private float foodCreaterTime = Const.FoodCreaterTime / 5;
 
 	// Use this for initialization
 	void Start () {
@@ -22,7 +22,7 @@ public class FoodCreater : MonoBehaviour {
             {
                 GameObject obj = Instantiate(foodArray[0].gameObject, new Vector3(transform.position.x,transform.position.y,foodArray[0].gameObject.transform.position.z), Quaternion.identity) as GameObject;
                 nowFood = obj.GetComponent<Food>();
-                foodCreaterTime = Const.foodCreaterTime;
+                foodCreaterTime = Const.FoodCreaterTime;
             }
         }
 	}
