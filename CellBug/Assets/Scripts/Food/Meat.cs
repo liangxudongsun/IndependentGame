@@ -16,6 +16,8 @@ public class Meat : Food {
         foodType = Const.FoodEnum.MeatEnum;
         power = Const.MeatPower;
         poison = 0;
+
+        Destroy(this.gameObject,Const.MeatLiveTime);
     }
 	
 	// Update is called once per frame

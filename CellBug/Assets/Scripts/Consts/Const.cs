@@ -11,13 +11,17 @@ public static class Const
     public static int DnaLineLength = 8;
 	public static float MaleTime = 30.0f;
 
+    public static int EnvironmentalCapacity = 50;//环境承载量 
+    public static float MaxLiveTime = 60.0f;//最长寿命
+    public static int DisMap = 50;//矩形地图的边长一半
     public static int VariationProbability = 10;//变异几率,为多少分之一 
     public static float TimeForPowerDelete = 2.0f;//每隔一点时间能量会减1
     public static float MaxPower = 200.0f;//最大能量值
-    public static float FoodCreaterTime = 20.0f;//食物生成间隔
+    public static float FoodCreaterTime = 30.0f;//食物生成间隔
     public static float CellBugCreaterTime = 5.0f;//精灵生成间隔
-    public static int CellBugCreaterNum = 2;//首次精灵生成数量
-    public static int StartPower = 60;
+    public static int CellBugCreaterNum = 3;//首次精灵生成数量
+    public static float MeatLiveTime = 20.0f;//肉存在的时间
+    public static int StartPower = 200;
     public static int PlantPower = 20;
     public static int MeatPower = 50;
 
@@ -29,8 +33,7 @@ public static class Const
     public static int PowerForMate = 60;        //寻找配偶的条件
     //AI
 
-    public static int lowSpeed = 5, middleSpeed = 8, highSpeed = 10;
-    public static string oneMusic = "", twoMusic = "", ThreeMusic = "";
+    public static int lowSpeed = 3, middleSpeed = 5, highSpeed = 8;
     public static int lowBirth = 1, middleBirth = 2, highBrith = 3;
     public static float lowPhotosynthesis = 0, middlePhotosynthesis = 0.2f, highPhotosynthesis = 0.4f;
     public static int lowAttackForce = 1, middleAttackForce = 3, highAttackForce = 5;

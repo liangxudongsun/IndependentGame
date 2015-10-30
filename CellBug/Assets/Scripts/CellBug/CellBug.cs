@@ -34,6 +34,11 @@ public class CellBug:MonoBehaviour
 
         ID++;
         ability.SetId(ID);
+
+        int seed = (int)System.DateTime.Now.Ticks + ID * 10;
+        System.Random random = new System.Random(seed);
+        int time = random.Next(1, 101);
+        ability.SetLiveTime(time);
     }
 
     void Start()
@@ -64,6 +69,7 @@ public class CellBug:MonoBehaviour
         }
 
         ability.UpdateMateTime(Time.deltaTime);
+        ability.liveTimeModify(Time.deltaTime);
         UpdatePowerForTime();
         UpdatePowerForGene();
         UpDateTitle();
@@ -275,6 +281,24 @@ public class CellBug:MonoBehaviour
     //死亡
     public void Dead(Const.DeadEnum deadEnum)
     {
+        switch (deadEnum)
+        {
+            case Const.DeadEnum.KilledEnum:
+                gameControl.AlertVision(this, "您被杀死了!");
+                break;
+            case Const.DeadEnum.PoisonEnum:
+                gameControl.AlertVision(this, "您被毒死了!");
+                break;
+            case Const.DeadEnum.StarveEnum:
+                gameControl.AlertVision(this, "您被饿死了!");
+                break;
+            case Const.DeadEnum.TimeRunOutEnum:
+                gameControl.AlertVision(this, "您寿终正寝!");
+                break;
+        }
+
+        this.GetComponent<CellBugMusic>().PlayDeadMusic(deadEnum);
+
         GameObject obj = Instantiate(meatProfabs, new Vector3(transform.position.x, transform.position.y, meatProfabs.transform.position.z), Quaternion.identity) as GameObject;
         Meat meat = obj.GetComponent<Meat>();
         meat.SetPoison(Const.GeneArray[(int)Const.GenesEnum.PoisonEnum].GetPoison(this));
@@ -283,7 +307,7 @@ public class CellBug:MonoBehaviour
         if (bloodSlider) Destroy(bloodSlider.gameObject);
 
         gameControl.DeleteCellBugAll(this);
-        Destroy(this.gameObject,0.5f);
+        Destroy(this.gameObject,1.5f);
     }
 
     public void TapCheck(Vector3 tapPosition)
@@ -305,7 +329,17 @@ public class CellBug:MonoBehaviour
 
                 if (tapedObject.GetComponent<CellBug>().GetAbility().GetGroup() == ability.GetGroup())
                 {
-                    if (ability.GetCanMate()) ReadyMate(tapedObject);
+                    if (ability.GetCanMate())
+                    {
+                        if (gameControl.GetCellBugNum() >= Const.EnvironmentalCapacity)
+                        {
+                            gameControl.AlertVision(this, "已达到环境承载上线,不能不能繁衍后代");
+                        }
+                        else
+                        {
+                            ReadyMate(tapedObject);
+                        }
+                    }
                     else gameControl.AlertVision(this, "未到发情期");
                 }
             }
@@ -327,12 +361,16 @@ public class CellBug:MonoBehaviour
         targetMateCellBug = tapedObject.GetComponent<CellBug>() as CellBug;
         ability.SetStatus(Const.StutasEnum.SearchMateEnum);
         ability.SetCanMate(false);
+
+        this.GetComponent<CellBugMusic>().PlayMateMusic(Const.GeneArray[(int)Const.GenesEnum.SongEnum].GetMusic(this));
     }
 
     public void ReadyAttack(GameObject tapedObject)
     {
         targetEnemy = tapedObject.GetComponent<CellBug>();
         ability.SetStatus(Const.StutasEnum.AttackEnum);
+
+        this.GetComponent<CellBugMusic>().PlayAttackMusic();
     }
 
     public void ReadyEat(GameObject tapedObject)
@@ -372,7 +410,9 @@ public class CellBug:MonoBehaviour
         float x = Mathf.Lerp(Camera.main.transform.position.x, transform.position.x, Time.deltaTime * 5);
         float y = Mathf.Lerp(Camera.main.transform.position.y, transform.position.y, Time.deltaTime * 5);
         float z = Camera.main.transform.position.z;
-        Camera.main.transform.position = new Vector3(x,y,z);
+        if (x <= -Const.DisMap || x >= Const.DisMap) x = Camera.main.transform.position.x;
+        if (y <= -Const.DisMap || y >= Const.DisMap) y = Camera.main.transform.position.y;
+        Camera.main.transform.position = new Vector3(x, y, z);
 
         if (!ability.isArrive)
         {
@@ -407,6 +447,9 @@ public class CellBug:MonoBehaviour
         int birthNum = Const.GeneArray[(int)Const.GenesEnum.BrithNumEnum].GetBirthNum(this);
         for (int i = 0; i < birthNum; i++)
         {
+            if (gameControl.GetCellBugNum() >= Const.EnvironmentalCapacity)
+                return;
+
             GameObject bug = Instantiate(cellBugProfabs, this.transform.position, Quaternion.identity) as GameObject;
             CellBug temCellBug = bug.GetComponent<CellBug>();
 

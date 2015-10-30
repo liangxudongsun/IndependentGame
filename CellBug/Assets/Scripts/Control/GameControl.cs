@@ -12,12 +12,19 @@ public class GameControl : MonoBehaviour
 
     public UILabel groupNum;
     public UILabel gameTime;
+    public UILabel capicity;
     public UISprite gameStatus;
     public UILabel alertLabel;
     public UILabel[] dnaLabelArray;
     public UILabel[] geneLabelArray;
     public UILabel[] otherGroupLabelArray;
+    
     void Awake()
+    {
+
+    }
+
+    void Start()
     {
 
     }
@@ -42,15 +49,6 @@ public class GameControl : MonoBehaviour
     public CellBug GetNowCellBug()
     {
         return nowCellBug;
-    }
-
-    public void ReSet()
-    {
-        SearchCellBug();
-        if (!nowCellBug)
-        {
-            //游戏结束
-        }
     }
 
     private void SearchCellBug()
@@ -186,6 +184,7 @@ public class GameControl : MonoBehaviour
             }
             if (i == cellBugAllList.Count - 1) i = -1;
         }
+
         DnaVision();
     }
 
@@ -194,6 +193,7 @@ public class GameControl : MonoBehaviour
         cellBugAllList.Add(cellBug);
         GeneLiveVision(cellBug);
         GroupNumChangeVision();
+        CapicityVision();
     }
 
     public void DeleteCellBugAll(CellBug cellBug)
@@ -201,7 +201,19 @@ public class GameControl : MonoBehaviour
         if (cellBug == nowCellBug) nowCellBug = null;
         GeneLiveVision(cellBug);
         cellBugAllList.Remove(cellBug);
-        if (GroupNumChangeVision() == 0) Application.LoadLevel("03");
+        CapicityVision();
+        GroupNumChangeVision(true);
+    }
+
+    private void GameResult(bool win)
+    {
+        if (win) Application.LoadLevel("04");
+        else  Application.LoadLevel("03");
+    }
+
+    public int GetCellBugNum()
+    {
+        return cellBugAllList.Count;
     }
 
     public void AddFood(Food food)
@@ -235,7 +247,7 @@ public class GameControl : MonoBehaviour
         gameTime.text = "" + hour + ":" + minte + ":" + second;
     }
 
-    private int GroupNumChangeVision(Const.CellBugGroup group = Const.CellBugGroup.GodChildEnum)
+    private void GroupNumChangeVision(bool isResult = false,Const.CellBugGroup group = Const.CellBugGroup.GodChildEnum)
     {
         int numGodChild = 0;
         int numOrc = 0;
@@ -256,7 +268,11 @@ public class GameControl : MonoBehaviour
         otherGroupLabelArray[1].text = "Human number:" + numHuman;
         otherGroupLabelArray[2].text = "Eidolon number:" + numEidolon;
 
-        return numGodChild;
+        if (isResult)
+        {
+            if (numGodChild == 0) GameResult(false);
+            if (numEidolon == 0 && numHuman == 0 && numOrc == 0 && numGodChild >= 1) GameResult(true);
+        }
     }
 
     public void AlertVision(CellBug cellBug,string message)
@@ -296,6 +312,11 @@ public class GameControl : MonoBehaviour
         }
     }
 
+    private void CapicityVision()
+    {
+        capicity.text = cellBugAllList.Count + "/" + Const.EnvironmentalCapacity;
+    }
+
     private void GeneLiveVision(CellBug cellBug)
     {
         if (nowCellBug == null 
@@ -321,7 +342,7 @@ public class GameControl : MonoBehaviour
 
         for (int m = 0; m < geneLabelArray.Length; m++ )
         {
-            geneLabelArray[m].text = Const.DnaName[m] + ":" + gene[m] / (2.0 * groupNum) * 100 + "%";
+            geneLabelArray[m].text = Const.DnaName[m] + ":" + (int)(gene[m] / (2.0 * groupNum) * 100) + "%";
         }
     }
 }

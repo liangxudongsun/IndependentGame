@@ -9,7 +9,7 @@ public class Gene
     public Const.GenesEnum GetGeneIndex() { return this.GeneIndex; }
 
     public virtual int GetSpeed(CellBug cellbug) { return 0; }
-    public virtual string GetMusic(CellBug cellbug) { return ""; }
+    public virtual int GetMusic(CellBug cellbug) { return 0; }
     public virtual int GetBirthNum(CellBug cellbug) { return 0; }
     public virtual int GetPowerGetFrom(CellBug cellbug) { return 0; }
     public virtual int GetPoison(CellBug cellbug) { return 0; }
@@ -64,31 +64,31 @@ public class Speed : Gene
 
 public class Song : Gene
 {
-    private string oneMusic, twoMusic, ThreeMusic, nowMusic;
+    private int oneMusic, twoMusic, ThreeMusic, nowMusic;
 
     public Song()
     {
         SetGeneIndex(Const.GenesEnum.SongEnum);
-        oneMusic = Const.oneMusic;
-        twoMusic = Const.twoMusic;
-        ThreeMusic = Const.ThreeMusic;
-        nowMusic = "";
+        oneMusic = 0;
+        twoMusic = 1;
+        ThreeMusic = 2;
+        nowMusic = 0;
 
         lowPowerCustom = Const.lowPowerCustomSong;
         middlePowerCustom = Const.middlePowerCustomSong;
         highPowerCustom = Const.highPowerCustomSong;
     }
 
-    public override string GetMusic(CellBug cellbug)
+    public override int GetMusic(CellBug cellbug)
     {
         //–Ë“™∑√Œ dna
 
         Dna dna = cellbug.GetAbility().GetDna();
         int songGeneTotal = dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.SongEnum)
                            + dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.SongEnum);
-        if (songGeneTotal == 0) nowMusic = oneMusic;
-        else if (songGeneTotal == 1) nowMusic = twoMusic;
-        else if (songGeneTotal == 2) nowMusic = ThreeMusic;
+        if (songGeneTotal == 0) nowMusic = 0;
+        else if (songGeneTotal == 1) nowMusic = 1;
+        else if (songGeneTotal == 2) nowMusic = 2;
 
         return nowMusic;
     }

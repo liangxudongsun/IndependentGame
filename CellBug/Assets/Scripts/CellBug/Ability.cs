@@ -5,12 +5,10 @@ using System.Collections;
 public class Ability{
 
     private CellBug mine;
-    //是否存活;
-    private bool isLive = true;
     //当前能量和最大能量;
     private float power = Const.StartPower;
     //当前剩余存活时间;
-    private float remainLiveTime = 300.0f;
+    private float remainLiveTime = Const.MaxLiveTime;
  
     /// <关于求偶>
     private float mateTime = Const.MaleTime;//发情时间间隔
@@ -37,11 +35,6 @@ public class Ability{
     public void TimeDrive(float deltaTime)
     {
 
-    }
-
-    public bool GetIsLive()
-    {
-        return isLive;
     }
 
     //出生的才会使用,系统产生的不使用
@@ -99,6 +92,11 @@ public class Ability{
          
     }
 
+    public void SetLiveTime(float time)
+    {
+        this.remainLiveTime += time;
+    }
+
     public Dna GetDna()
     {
         return dna;
@@ -111,7 +109,6 @@ public class Ability{
         mine.GetBloodSlider().value = power / Const.MaxPower;
         if (power <= 0)
         {
-            isLive = false;
             return false;
         }
         return true;
@@ -124,10 +121,11 @@ public class Ability{
 
     public void liveTimeModify(float timePass)
     {
+        if (remainLiveTime <= 0) return;
         remainLiveTime -= timePass;
         if (remainLiveTime < 0)
         {
-            isLive = false;
+            mine.Dead(Const.DeadEnum.TimeRunOutEnum);
         }
     }
 

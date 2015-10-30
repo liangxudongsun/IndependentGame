@@ -60,7 +60,8 @@ public class AIControl{
         mate = cellBug.GetGameControl().SearchMate(cellBug);
         if (mate != null
             && cellBug.GetAbility().GetPower() >= Const.PowerForMate
-            && cellBug.GetAbility().GetCanMate())
+            && cellBug.GetAbility().GetCanMate()
+            && cellBug.GetGameControl().GetCellBugNum() < Const.EnvironmentalCapacity)
         {
             cellBug.ReadyMate(mate.gameObject);
             return true;
@@ -115,8 +116,8 @@ public class AIControl{
     {
         int seed = (int)DateTime.Now.Ticks + cellBug.GetAbility().GetId() * 10;
         System.Random random = new System.Random(seed);
-        int x = random.Next(-50,50);
-        int y = random.Next(-50,50);
+        int x = random.Next(-Const.DisMap,Const.DisMap);
+        int y = random.Next(-Const.DisMap,Const.DisMap);
         targetPosition = new Vector3(x,y,cellBug.transform.position.z);
     }
 }
