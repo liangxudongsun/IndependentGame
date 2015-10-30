@@ -77,6 +77,8 @@ public class CellBug:MonoBehaviour
 
     private void UpdatePowerForTime()
     {
+        if (!ability.GetIsLive()) return;
+
         timeforpower -= Time.deltaTime;
         if (timeforpower <= 0)
         {
@@ -87,6 +89,8 @@ public class CellBug:MonoBehaviour
 
     private void UpdatePowerForGene()
     {
+        if (!ability.GetIsLive()) return;
+
         geneforPower -= Time.deltaTime;
         if (geneforPower <= 0)
         {

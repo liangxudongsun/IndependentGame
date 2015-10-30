@@ -9,6 +9,7 @@ public class Ability{
     private float power = Const.StartPower;
     //当前剩余存活时间;
     private float remainLiveTime = Const.MaxLiveTime;
+    private bool isLive = true;
  
     /// <关于求偶>
     private float mateTime = Const.MaleTime;//发情时间间隔
@@ -109,6 +110,7 @@ public class Ability{
         mine.GetBloodSlider().value = power / Const.MaxPower;
         if (power <= 0)
         {
+            isLive = false;
             return false;
         }
         return true;
@@ -121,16 +123,18 @@ public class Ability{
 
     public void liveTimeModify(float timePass)
     {
-        if (remainLiveTime <= 0) return;
+        if (!isLive) return;
         remainLiveTime -= timePass;
         if (remainLiveTime < 0)
         {
             mine.Dead(Const.DeadEnum.TimeRunOutEnum);
+            isLive = false;
         }
     }
 
     public void UpdateMateTime(float time)
     {
+        if (!isLive) return;
         mateTime -= time;
         if (canMate == false && mateTime <= 0)
         {
@@ -175,6 +179,11 @@ public class Ability{
     public Const.CellBugGroup GetGroup()
     {
         return cellBugGroup;
+    }
+
+    public bool GetIsLive()
+    {
+        return isLive;
     }
 
     public void SetId(int id)
