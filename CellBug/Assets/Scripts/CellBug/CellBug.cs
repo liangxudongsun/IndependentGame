@@ -57,16 +57,10 @@ public class CellBug:MonoBehaviour
 
     void Update()
     {
-        if (!isAI)
-        {
-            UpdateStatus();
-            UpdatePosition();
-        }
-        else
-        {
-            aiControl.UpdateStatus(this);
-            aiControl.UpdatePosition(this);
-        }
+        if (!ability.GetIsLive()) return;
+
+        if (!isAI){UpdateStatus();UpdatePosition();}
+        else{aiControl.UpdateStatus(this);aiControl.UpdatePosition(this);}
 
         ability.UpdateMateTime(Time.deltaTime);
         ability.liveTimeModify(Time.deltaTime);
@@ -77,8 +71,6 @@ public class CellBug:MonoBehaviour
 
     private void UpdatePowerForTime()
     {
-        if (!ability.GetIsLive()) return;
-
         timeforpower -= Time.deltaTime;
         if (timeforpower <= 0)
         {
@@ -89,8 +81,6 @@ public class CellBug:MonoBehaviour
 
     private void UpdatePowerForGene()
     {
-        if (!ability.GetIsLive()) return;
-
         geneforPower -= Time.deltaTime;
         if (geneforPower <= 0)
         {
@@ -130,7 +120,7 @@ public class CellBug:MonoBehaviour
     public void Attack()
     {
         //Èç¹ûËÀÍöÔòÍ£Ö¹¹¥»÷
-        if (!targetEnemy) 
+        if (!targetEnemy || !targetEnemy.GetAbility().GetIsLive()) 
         {
             ability.SetStatus(Const.StutasEnum.IdleEnum);
             gameControl.AlertVision(this,"µÐÈËÒÑËÀÍö");
@@ -223,7 +213,8 @@ public class CellBug:MonoBehaviour
                 this.GetAbility().SetPower(targetFood.GetPower());
             }
             else
-            { 
+            {
+                ability.SetIsLive(false);
                 this.Dead(Const.DeadEnum.PoisonEnum); 
             }
             ability.SetStatus(Const.StutasEnum.IdleEnum);

@@ -108,7 +108,7 @@ public class Ability{
         power += powerModify;
         if (power > Const.MaxPower) power = Const.MaxPower;
         mine.GetBloodSlider().value = power / Const.MaxPower;
-        if (power <= 0)
+        if (power <= 0 && isLive == true)
         {
             isLive = false;
             return false;
@@ -123,7 +123,6 @@ public class Ability{
 
     public void liveTimeModify(float timePass)
     {
-        if (!isLive) return;
         remainLiveTime -= timePass;
         if (remainLiveTime < 0)
         {
@@ -185,6 +184,12 @@ public class Ability{
     {
         return isLive;
     }
+
+    public void SetIsLive(bool isLive)
+    {
+        this.isLive = isLive;
+    }
+
 
     public void SetId(int id)
     {

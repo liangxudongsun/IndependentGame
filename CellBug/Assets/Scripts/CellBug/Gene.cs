@@ -64,14 +64,14 @@ public class Speed : Gene
 
 public class Song : Gene
 {
-    private int oneMusic, twoMusic, ThreeMusic, nowMusic;
+    private int oneMusic, twoMusic, threeMusic, nowMusic;
 
     public Song()
     {
         SetGeneIndex(Const.GenesEnum.SongEnum);
         oneMusic = 0;
         twoMusic = 1;
-        ThreeMusic = 2;
+        threeMusic = 2;
         nowMusic = 0;
 
         lowPowerCustom = Const.lowPowerCustomSong;
@@ -86,9 +86,9 @@ public class Song : Gene
         Dna dna = cellbug.GetAbility().GetDna();
         int songGeneTotal = dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.SongEnum)
                            + dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.SongEnum);
-        if (songGeneTotal == 0) nowMusic = 0;
-        else if (songGeneTotal == 1) nowMusic = 1;
-        else if (songGeneTotal == 2) nowMusic = 2;
+        if (songGeneTotal == 0) nowMusic = oneMusic;
+        else if (songGeneTotal == 1) nowMusic = twoMusic;
+        else if (songGeneTotal == 2) nowMusic = threeMusic;
 
         return nowMusic;
     }

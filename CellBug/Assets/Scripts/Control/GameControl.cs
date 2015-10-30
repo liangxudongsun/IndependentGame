@@ -80,7 +80,7 @@ public class GameControl : MonoBehaviour
             if (!tempFood.GetCanEat()) continue;
             if (powerFrom == 0 && tempFood.GetFoodType() == Const.FoodEnum.MeatEnum) continue;
             if (powerFrom == 2 && tempFood.GetFoodType() == Const.FoodEnum.GrassEnum) continue;
-            if (Vector3.Magnitude(cellBug.transform.position - tempFood.transform.position) < dis)
+            if (tempFood && Vector3.Magnitude(cellBug.transform.position - tempFood.transform.position) < dis)
             {
                 foodList.Add(tempFood);
             }
@@ -113,7 +113,7 @@ public class GameControl : MonoBehaviour
         {
             CellBug tempCellBug = cellBugAllList[i] as CellBug;
             if (cellBug.GetAbility().GetGroup() == tempCellBug.GetAbility().GetGroup()) continue;
-            if (Vector3.Magnitude(cellBug.transform.position - tempCellBug.transform.position) < dis
+            if (tempCellBug && Vector3.Magnitude(cellBug.transform.position - tempCellBug.transform.position) < dis
                 && tempCellBug.GetAbility().GetPower() < cellBug.GetAbility().GetPower())
             {
                 enemyBugList.Add(tempCellBug);
@@ -144,7 +144,7 @@ public class GameControl : MonoBehaviour
         for (int i = 0; i < cellBugAllList.Count; i++)
         {
             CellBug tempBug = cellBugAllList[i] as CellBug;
-            if (tempBug.GetAbility().GetStatus() != Const.StutasEnum.SearchMateEnum
+            if (tempBug && tempBug.GetAbility().GetStatus() != Const.StutasEnum.SearchMateEnum
                 && tempBug.GetAbility().GetGroup() == group
                 && tempBug != cellBug)
             {
@@ -232,7 +232,8 @@ public class GameControl : MonoBehaviour
         {
             for (int m = 0; m < dnaLabelArray.Length; m++)
             {
-                dnaLabelArray[m].text = Const.DnaName[m] + "(" + nowCellBug.GetAbility().GetDna().GetDnaIndex(Const.DnaLineEnum.OneEnum, (Const.GenesEnum)m) + "-"
+                dnaLabelArray[m].text = Const.DnaName[m] + "(" 
+                    + nowCellBug.GetAbility().GetDna().GetDnaIndex(Const.DnaLineEnum.OneEnum, (Const.GenesEnum)m) + "-"
                     + nowCellBug.GetAbility().GetDna().GetDnaIndex(Const.DnaLineEnum.TwoEnum, (Const.GenesEnum)m) + ")";
             }
         }
