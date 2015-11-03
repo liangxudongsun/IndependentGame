@@ -9,6 +9,7 @@ public class GameControl : MonoBehaviour
     private ArrayList foodArrayList = new ArrayList();     //食物集合
     private CellBug nowCellBug = null;
     private int nowCellBugIndex = 0;
+    private bool isTap = false;
 
     public UILabel groupNum;
     public UILabel gameTime;
@@ -32,18 +33,30 @@ public class GameControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!nowCellBug)
-        {
-            SearchCellBug();
-            return;
-        }
+        if (!nowCellBug){SearchCellBug();return;}
+        Tap();
+        TimeVision(Time.timeSinceLevelLoad);
+    }
+
+    private void Tap()
+    {
         if (Input.GetMouseButtonDown(0)
             && UICamera.hoveredObject == null)
+        {
+            isTap = true;
+            nowCellBug.TapCheck(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+        }
+
+        if (isTap)
         {
             nowCellBug.TapCheck(Camera.main.ScreenToWorldPoint(Input.mousePosition));
         }
 
-        TimeVision(Time.timeSinceLevelLoad);
+        if (Input.GetMouseButtonUp(0)
+            && UICamera.hoveredObject == null)
+        {
+            isTap = false;
+        }
     }
 
     public CellBug GetNowCellBug()
@@ -65,6 +78,7 @@ public class GameControl : MonoBehaviour
             }
             continue;
         }
+
         DnaVision();
     }
 
@@ -184,25 +198,27 @@ public class GameControl : MonoBehaviour
             }
             if (i == cellBugAllList.Count - 1) i = -1;
         }
-
         DnaVision();
     }
 
     public void AddCellBugAll(CellBug cellBug)
     {
         cellBugAllList.Add(cellBug);
-        GeneLiveVision(cellBug);
         GroupNumChangeVision();
         CapicityVision();
+        GeneLiveVision(cellBug);
     }
 
     public void DeleteCellBugAll(CellBug cellBug)
     {
-        if (cellBug == nowCellBug) nowCellBug = null;
+        if (cellBug == nowCellBug) 
+            nowCellBug = null;
         GeneLiveVision(cellBug);
         cellBugAllList.Remove(cellBug);
         CapicityVision();
         GroupNumChangeVision(true);
+
+        Resources.UnloadUnusedAssets();
     }
 
     private void GameResult(bool win)
@@ -232,7 +248,7 @@ public class GameControl : MonoBehaviour
         {
             for (int m = 0; m < dnaLabelArray.Length; m++)
             {
-                dnaLabelArray[m].text = Const.DnaName[m] + "(" 
+                dnaLabelArray[m].text = Const.DnaName[m] + "("
                     + nowCellBug.GetAbility().GetDna().GetDnaIndex(Const.DnaLineEnum.OneEnum, (Const.GenesEnum)m) + "-"
                     + nowCellBug.GetAbility().GetDna().GetDnaIndex(Const.DnaLineEnum.TwoEnum, (Const.GenesEnum)m) + ")";
             }

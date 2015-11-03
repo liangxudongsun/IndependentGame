@@ -4,7 +4,7 @@ using System.Collections;
 
 public class CellBugCreater : MonoBehaviour {
 
-    public CellBug cellBug;
+    public CellBug[] cellBugProfabs;
     public Const.CellBugGroup group = Const.CellBugGroup.GodChildEnum;
 
     private int cellBugNum = Const.CellBugCreaterNum;
@@ -32,9 +32,9 @@ public class CellBugCreater : MonoBehaviour {
         int seed = (int)DateTime.Now.Ticks + 100 * (int)group;
         System.Random random = new System.Random(seed);
         int dis = random.Next(1, 5);
-        float z = cellBug.transform.position.z;
+        float z = cellBugProfabs[(int)group].transform.position.z;
         Vector3 position = transform.position + new Vector3(dis,dis,z);
-        CellBug bug = Instantiate(cellBug,position,Quaternion.identity) as CellBug;
+        CellBug bug = Instantiate(cellBugProfabs[(int)group],position,Quaternion.identity) as CellBug;
         bug.GetAbility().SetGroup(group);
     }
 }

@@ -48,11 +48,19 @@ public class Ability{
         {
             mine.transform.FindChild("speed").gameObject.SetActive(true);
         }
+        else
+        {
+            mine.transform.FindChild("speed").gameObject.SetActive(false);
+        }
 
         if (dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.PoisonEnum) == 1
             || dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.PoisonEnum) == 1)
         {
             mine.transform.FindChild("poison").gameObject.SetActive(true);
+        }
+        else
+        {
+            mine.transform.FindChild("poison").gameObject.SetActive(false);
         }
 
         if (dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.AntibioticEnum) == 1
@@ -60,11 +68,19 @@ public class Ability{
         {
             mine.transform.FindChild("antibiotic").gameObject.SetActive(true);
         }
+        else
+        {
+            mine.transform.FindChild("antibiotic").gameObject.SetActive(false);
+        }
 
         if (dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.AttackForceEnum) == 1
             || dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.AttackForceEnum) == 1)
         {
             mine.transform.FindChild("attackForce").gameObject.SetActive(true);
+        }
+        else
+        {
+            mine.transform.FindChild("attackForce").gameObject.SetActive(false);
         }
 
         if (dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.BrithNumEnum) == 1
@@ -72,11 +88,19 @@ public class Ability{
         {
             mine.transform.FindChild("brithNum").gameObject.SetActive(true);
         }
+        else
+        {
+            mine.transform.FindChild("brithNum").gameObject.SetActive(false);
+        }
 
         if (dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.PhotosynthesisEnum) == 1
             || dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.PhotosynthesisEnum) == 1)
         {
             mine.transform.FindChild("photosynthesis").gameObject.SetActive(true);
+        }
+        else
+        {
+            mine.transform.FindChild("photosynthesis").gameObject.SetActive(false);
         }
 
         if (dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.PowerGetFromEnum) == 1
@@ -84,13 +108,20 @@ public class Ability{
         {
             mine.transform.FindChild("powerGetFrom").gameObject.SetActive(true);
         }
+        else
+        {
+            mine.transform.FindChild("powerGetFrom").gameObject.SetActive(false);
+        }
 
         if (dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.SongEnum) == 1
             || dna.GetDnaIndex(Const.DnaLineEnum.TwoEnum, Const.GenesEnum.SongEnum) == 1)
         {
             mine.transform.FindChild("song").gameObject.SetActive(true);
         }
-         
+        else
+        {
+            mine.transform.FindChild("song").gameObject.SetActive(false);
+        }
     }
 
     public void SetLiveTime(float time)

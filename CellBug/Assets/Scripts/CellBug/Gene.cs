@@ -38,6 +38,7 @@ public class Speed : Gene
 
     public override int GetSpeed(CellBug cellbug)
     {
+        if (!cellbug) return 0;
         //ĞèÒª·ÃÎÊdna
         Dna dna = cellbug.GetAbility().GetDna();
         int speedGeneTotal = dna.GetDnaIndex(Const.DnaLineEnum.OneEnum, Const.GenesEnum.SpeedEnum)

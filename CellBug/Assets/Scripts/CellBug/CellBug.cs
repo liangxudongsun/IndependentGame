@@ -18,13 +18,17 @@ public class CellBug:MonoBehaviour
     private bool isAI = true;
     private AIControl aiControl = new AIControl();
 
-    public GameObject cellBugProfabs;
+    public GameObject[] cellBugProfabs;
     public GameObject meatProfabs;
 
     public GameObject titleProfabs;
     public GameObject bloodProfabs;
+    public GameObject flagProfabs;
+    public GameObject flagLove;
+
     private UILabel titleLabel = null;
     private UISlider bloodSlider = null;
+    private UISprite flagSprite = null; 
 
     private static int ID = 0;
 
@@ -48,11 +52,15 @@ public class CellBug:MonoBehaviour
 
         GameObject gameObjectTitle = Instantiate(titleProfabs, transform.position + new Vector3(0,1,-1), Quaternion.identity) as GameObject;
         titleLabel = gameObjectTitle.GetComponent<UILabel>();
-        titleLabel.text = Const.GroupName[(int)ability.GetGroup()] + "id:" +ability.GetId();
+        titleLabel.text = Const.GroupName[(int)ability.GetGroup()] + ":" +ability.GetId();
 
         GameObject gameObjectBlood = Instantiate(bloodProfabs,transform.position + new Vector3(0,1,-1),Quaternion.identity) as GameObject;
         bloodSlider = gameObjectBlood.GetComponent<UISlider>();
         bloodSlider.value = ability.GetPower() / Const.MaxPower;
+
+        GameObject gameObjectFlag = Instantiate(flagProfabs, transform.position + new Vector3(0, 1, -1), Quaternion.identity) as GameObject;
+        flagSprite = gameObjectFlag.GetComponent<UISprite>();
+        flagSprite.enabled = false;
     }
 
     void Update()
@@ -114,6 +122,11 @@ public class CellBug:MonoBehaviour
     public void SetIsAI(bool isAI)
     {
         this.isAI = isAI;
+        if (this.isAI && flagSprite.enabled == true) flagSprite.enabled = false;
+        else
+        {
+            flagSprite.enabled = true;
+        }
     }
 
     //攻击
@@ -300,9 +313,11 @@ public class CellBug:MonoBehaviour
 
         if (titleLabel) Destroy(titleLabel.gameObject);
         if (bloodSlider) Destroy(bloodSlider.gameObject);
+        if (flagSprite) Destroy(flagSprite.gameObject);
 
         gameControl.DeleteCellBugAll(this);
         Destroy(this.gameObject,1.5f);
+        this.gameObject.SetActive(false);
     }
 
     public void TapCheck(Vector3 tapPosition)
@@ -429,9 +444,11 @@ public class CellBug:MonoBehaviour
     private void UpDateTitle()
     {
         if (titleLabel)
-           titleLabel.transform.position = UICamera.mainCamera.ScreenToWorldPoint(Camera.main.WorldToScreenPoint(transform.position)) + new Vector3(0,0.2f,0); 
+            titleLabel.transform.position = UICamera.mainCamera.ScreenToWorldPoint(Camera.main.WorldToScreenPoint(transform.position)) + new Vector3(0, 0.1f, 0);
         if (bloodSlider)
-           bloodSlider.transform.position = UICamera.mainCamera.ScreenToWorldPoint(Camera.main.WorldToScreenPoint(transform.position)) + new Vector3(0,0.1f,0);
+            bloodSlider.transform.position = UICamera.mainCamera.ScreenToWorldPoint(Camera.main.WorldToScreenPoint(transform.position)) + new Vector3(0, 0.05f, 0);
+        if (bloodSlider && !isAI)
+            flagSprite.transform.position = UICamera.mainCamera.ScreenToWorldPoint(Camera.main.WorldToScreenPoint(transform.position));
     }
 
     //产生后代
@@ -439,19 +456,23 @@ public class CellBug:MonoBehaviour
     {
         ability.SetStatus(Const.StutasEnum.IdleEnum);
 
+        Instantiate(flagLove,transform.position - new Vector3(0,0,1), Quaternion.identity);
+
         int birthNum = Const.GeneArray[(int)Const.GenesEnum.BrithNumEnum].GetBirthNum(this);
+        int bugNum = gameControl.GetCellBugNum();
+
         for (int i = 0; i < birthNum; i++)
         {
-            if (gameControl.GetCellBugNum() >= Const.EnvironmentalCapacity)
+            if (bugNum + i + 1 > Const.EnvironmentalCapacity)
                 return;
 
-            GameObject bug = Instantiate(cellBugProfabs, this.transform.position, Quaternion.identity) as GameObject;
+            GameObject bug = Instantiate(cellBugProfabs[(int)ability.GetGroup()], this.transform.position, Quaternion.identity) as GameObject;
             CellBug temCellBug = bug.GetComponent<CellBug>();
 
             int[] lineOne = this.GetAbility().GetDna().DnaVariation();
             int[] lineTwo = cellBug.GetAbility().GetDna().DnaVariation();
-            temCellBug.GetAbility().SetDNA(lineOne, lineTwo);
             temCellBug.GetAbility().SetGroup(this.ability.GetGroup());
+            temCellBug.GetAbility().SetDNA(lineOne, lineTwo);
         }
     }
 }
