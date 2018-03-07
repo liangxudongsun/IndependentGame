@@ -1,0 +1,32 @@
+{
+  "appKey": "",
+  "appSecret": "",
+  "encryptJs": true,
+  "excludeScenes": [],
+  "includeAnySDK": false,
+  "includeSDKBox": false,
+  "inlineSpriteFrames": true,
+  "inlineSpriteFrames_native": true,
+  "jailbreakPlatform": false,
+  "md5Cache": false,
+  "mergeStartScene": false,
+  "oauthLoginServer": "",
+  "optimizeHotUpdate": false,
+  "orientation": {
+    "landscapeLeft": true,
+    "landscapeRight": true,
+    "portrait": false,
+    "upsideDown": false
+  },
+  "packageName": "org.cocos2d.HelloWord",
+  "privateKey": "",
+  "renderMode": "0",
+  "startScene": "e3c2b668-5aaa-47ce-9348-23bf07e704d8",
+  "title": "HelloWord",
+  "webOrientation": "auto",
+  "wechatgame": {
+    "appid": "",
+    "orientation": "portrait"
+  },
+  "xxteaKey": "0d3a543c-b9f5-4c"
+}
